@@ -175,30 +175,75 @@ cd ALAD-Mobile
 
 ---
 
-## 🧠 System Architecture
+## 🧠 System Architecture & Workflow
 
-```text
-[ Internal Audio (MediaProjection) ]
-                │
-                ▼ (16kHz PCM Stream)
-[ AudioDubbingForegroundService ]
-                │
-                ▼ (WebSocket BidiGenerateContent)
-[ Google Gemini 3.5 Live Model ]
-                │
-                ▼ (Real-Time Translated Speech Stream)
-[ Low-Latency AudioTrack Player ] ──► [ User Earphones / Speaker ]
+ALAD uses a reactive, pipeline-based event-driven streaming architecture designed for sub-second vocal dubbing latency:
+
+```mermaid
+flowchart TD
+    subgraph Capture["📱 1. Internal Audio Capture"]
+        APP["Active Media App<br/><i>(YouTube / Netflix / Spotify)</i>"]
+        MP["MediaProjection API<br/><code>AudioPlaybackCaptureConfiguration</code>"]
+        REC["AudioRecord Engine<br/><code>16kHz Mono PCM Buffer</code>"]
+        APP -->|"Raw System Audio"| MP
+        MP -->|"PCM Bytes"| REC
+    end
+
+    subgraph Service["⚡ 2. Core Service & Streaming Engine"]
+        FS["AudioDubbingForegroundService<br/><i>(Persistent Lifecycle & State Sync)</i>"]
+        WS["OkHttp WebSocket Client<br/><code>BidiGenerateContent Protocol</code>"]
+        DUCK["Smart Audio Ducking<br/><i>(Dynamic Media Volume Attenuation)</i>"]
+        REC -->|"16kHz PCM Chunks"| FS
+        FS -->|"Real-time Upstream Stream"| WS
+        FS -.->|"Ducking Signal"| DUCK
+    end
+
+    subgraph Cloud["☁️ 3. Google Gemini 3.5 Live AI"]
+        GEMINI["<b>Gemini Live Translate Engine</b><br/><code>gemini-2.0-flash-exp / Live Bidi</code><br/><i>Ultra-Low Latency Speech-to-Speech</i>"]
+        WS <-->|"Bi-directional Streaming Protocol"| GEMINI
+    end
+
+    subgraph Playback["🔊 4. Low-Latency Audio Rendering"]
+        DEC["Audio Response Stream Parser<br/><i>Real-time PCM Decoder</i>"]
+        AT["Low-Latency AudioTrack<br/><i>Direct PCM Buffer Streaming</i>"]
+        OUT["User Earphones / Speaker 🎧"]
+        WS -->|"Downstream AI Audio"| DEC
+        DEC -->|"PCM Chunks"| AT
+        AT -->|"Crystal Clear Dubbed Voice"| OUT
+    end
+
+    subgraph Controls["🎛️ 5. Modern UI & Floating Overlay"]
+        UI["Jetpack Compose Dashboard<br/><i>(Dark Glassmorphism UI)</i>"]
+        WIDGET["Floating Overlay Controller<br/><i>(👆 Double-Tap Gesture & Haptics)</i>"]
+        UI <-->|"StateFlow / UI Sync"| FS
+        WIDGET <-->|"Haptic & Overlay Control"| FS
+    end
+
+    classDef capture fill:#0f172a,stroke:#38bdf8,stroke-width:2px,color:#f8fafc;
+    classDef service fill:#1e1b4b,stroke:#818cf8,stroke-width:2px,color:#f8fafc;
+    classDef cloud fill:#064e3b,stroke:#34d399,stroke-width:2px,color:#f8fafc;
+    classDef playback fill:#4c0519,stroke:#fb7185,stroke-width:2px,color:#f8fafc;
+    classDef controls fill:#2e1065,stroke:#c084fc,stroke-width:2px,color:#f8fafc;
+
+    class APP,MP,REC capture;
+    class FS,WS,DUCK service;
+    class GEMINI cloud;
+    class DEC,AT,OUT playback;
+    class UI,WIDGET controls;
 ```
 
-| Layer / Component | Technology | Responsibility |
+### 🧩 Architectural Components Breakdown
+
+| Layer / Component | Technology Stack | Responsibility & Highlights |
 |---|---|---|
-| **Audio Capture** | `MediaProjection API` + `AudioRecord` | Captures internal system audio with zero mic noise |
-| **Streaming Protocol** | `OkHttp WebSocket` | Persistent low-latency communication with Gemini Live |
-| **AI Translation** | `gemini-3.5-live-translate-preview` | Real-time speech-to-speech translation engine |
-| **Audio Playback** | `AudioTrack (PCM Streaming)` | Ultra-low latency voice rendering with ducking |
-| **Foreground Service** | `LifecycleService` | Manages continuous background operation & sync |
-| **Floating Controller** | `WindowManager` + `Jetpack Compose` | Overlay widget with double-tap & gestures |
-| **UI Framework** | `Jetpack Compose + Material 3` | Modern dark glassmorphic design system |
+| **📱 Internal Audio Capture** | `MediaProjection API` + `AudioRecord` | Captures crisp, direct internal digital audio from target apps with 0% ambient mic noise. |
+| **🌐 Bi-directional Streaming** | `OkHttp WebSocket Client` | Maintains persistent, ultra-low latency WebSocket connection using Gemini's `BidiGenerateContent` protocol. |
+| **🧠 Real-Time AI Dubbing** | `gemini-3.5-live-translate-preview` | Google DeepMind's speech-to-speech engine performing continuous translation and vocal synthesis. |
+| **🔊 Smart Audio Playback** | `AudioTrack (16kHz PCM)` + `AudioManager` | Streams synthesized speech directly with automatic **Audio Ducking** (lowering original media volume). |
+| **⚡ Foreground Lifecycle** | `LifecycleService` + `Coroutines/Flows` | Guarantees resilient background execution without Android OS kills, synchronizing live states. |
+| **🎛️ Smart Floating Overlay** | `WindowManager` + `Jetpack Compose` | Draggable widget with live halo animations, tactile **Haptic Feedback**, and **Double-Tap Pause/Resume**. |
+| **🎨 Design System** | `Jetpack Compose + Material 3` | Futuristic **Dark Glassmorphism** with translucent surfaces, mesh glows, and 3D buttons. |
+| **🔒 Secure Storage** | `Jetpack DataStore (Preferences)` | Encrypted, reactive local storage for API keys and language selections. |
 
 ---
 

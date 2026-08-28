@@ -175,30 +175,75 @@ cd ALAD-Mobile
 
 ---
 
-## 🧠 معماری و عملکرد برنامه
+## 🧠 معماری و عملکرد برنامه (System Architecture)
 
-```text
-[ صدای داخلی سیستم (MediaProjection) ]
-                │
-                ▼ (جریان صوتی 16kHz PCM)
-[ سرویس پس‌زمینه AudioDubbingForegroundService ]
-                │
-                ▼ (اتصال پرسرعت وب‌سوکت BidiGenerateContent)
-[ مدل هوش مصنوعی Gemini 3.5 Live ]
-                │
-                ▼ (استریم زنده گفتار ترجمه‌شده)
-[ پخش‌کننده صوتی AudioTrack Player ] ──► [ هدفون / اسپیکر کاربر ]
+اپلیکیشن ALAD از یک معماری رویداد-محور و پایپ‌لاین استریمینگ دوطرفه برای دستیابی به کمترین تاخیر زمانی (زیر ۱ ثانیه) استفاده می‌کند:
+
+```mermaid
+flowchart TD
+    subgraph Capture["📱 ۱. ضبط صدای داخلی سیستم"]
+        APP["اپلیکیشن فعال<br/><i>(یوتیوب / نتفلیکس / اسپاتیفای)</i>"]
+        MP["MediaProjection API<br/><code>AudioPlaybackCaptureConfiguration</code>"]
+        REC["موتور صوتی AudioRecord<br/><code>بافر 16kHz Mono PCM</code>"]
+        APP -->|"صدای خام سیستم"| MP
+        MP -->|"بایت‌های PCM"| REC
+    end
+
+    subgraph Service["⚡ ۲. سرویس مرکزی و پایپ‌لاین استریم"]
+        FS["AudioDubbingForegroundService<br/><i>(مدیریت چرخه حیات و پایداری در پس‌زمینه)</i>"]
+        WS["کلاینت وب‌سوکت OkHttp<br/><code>پروتکل BidiGenerateContent</code>"]
+        DUCK["کاهش هوشمند صدای پس‌زمینه<br/><i>(Audio Ducking داینامیک)</i>"]
+        REC -->|"تکه‌های صوتی 16kHz"| FS
+        FS -->|"استریم مستقیم Upstream"| WS
+        FS -.->|"سیگنال کنترل صدا"| DUCK
+    end
+
+    subgraph Cloud["☁️ ۳. هوش مصنوعی Google Gemini 3.5 Live"]
+        GEMINI["<b>موتور ترجمه گفتار به گفتار جمینای</b><br/><code>gemini-2.0-flash-exp / Live Bidi</code><br/><i>دوبله صوتی زنده با سرعت فوق‌العاده</i>"]
+        WS <-->|"پروتکل استریم دوطرفه"| GEMINI
+    end
+
+    subgraph Playback["🔊 ۴. پخش صوتی بلادرنگ"]
+        DEC["پارسِر استریم پاسخ صوتی<br/><i>دیکودر بلادرنگ PCM</i>"]
+        AT["پلیر کم‌تاخیر AudioTrack<br/><i>پخش مستقیم بافر صوتی</i>"]
+        OUT["هدفون / اسپیکر کاربر 🎧"]
+        WS -->|"دریافت صدای هوش مصنوعی"| DEC
+        DEC -->|"تکه‌های دیکود شده PCM"| AT
+        AT -->|"صدای دوبله شده و شفاف"| OUT
+    end
+
+    subgraph Controls["🎛️ ۵. رابط کاربری و کنترل شناور"]
+        UI["داشبورد Jetpack Compose<br/><i>(طراحی شیشه‌ای Dark Glassmorphism)</i>"]
+        WIDGET["کنترلر ویجت شناور<br/><i>(👆 ژست دوبار ضربه و بازخورد لمسی Haptic)</i>"]
+        UI <-->|"همگام‌سازی زنده با StateFlow"| FS
+        WIDGET <-->|"کنترل شناور و ویبره لمسی"| FS
+    end
+
+    classDef capture fill:#0f172a,stroke:#38bdf8,stroke-width:2px,color:#f8fafc;
+    classDef service fill:#1e1b4b,stroke:#818cf8,stroke-width:2px,color:#f8fafc;
+    classDef cloud fill:#064e3b,stroke:#34d399,stroke-width:2px,color:#f8fafc;
+    classDef playback fill:#4c0519,stroke:#fb7185,stroke-width:2px,color:#f8fafc;
+    classDef controls fill:#2e1065,stroke:#c084fc,stroke-width:2px,color:#f8fafc;
+
+    class APP,MP,REC capture;
+    class FS,WS,DUCK service;
+    class GEMINI cloud;
+    class DEC,AT,OUT playback;
+    class UI,WIDGET controls;
 ```
 
-| لایه / بخش | تکنولوژی | مسئولیت |
+### 🧩 تشریح لایه‌ها و اجزای فنی
+
+| لایه / ماژول | تکنولوژی | مسئولیت و قابلیت‌های کلیدی |
 |---|---|---|
-| **ضبط صدا** | `MediaProjection API` + `AudioRecord` | ضبط صدای مستقیم سیستم بدون دریافت صدای میکروفون |
-| **پروتکل استریم** | `OkHttp WebSocket` | ارتباط مداوم و فوق سریع با هوش مصنوعی جمینای |
-| **موتور هوش مصنوعی** | `gemini-3.5-live-translate-preview` | مدل ترجمه کلامی و دوبله همزمان در لحظه |
-| **پخش صدا** | `AudioTrack (PCM Streaming)` | پخش بلادرنگ صدا به همراه کاهش صدای پس‌زمینه |
-| **سرویس پس‌زمینه** | `LifecycleService` | مدیریت اجرای مداوم برنامه در پس‌زمینه سیستم |
-| **کنترلر شناور** | `WindowManager` + `Jetpack Compose` | ویجت شناور با قابلیت ژست دو بار ضربه |
-| **رابط کاربری** | `Jetpack Compose + Material 3` | سیستم دیزاین مدرن و تیره شیشه‌ای |
+| **📱 ضبط صدای سیستم** | `MediaProjection API` + `AudioRecord` | ضبط صدای مستقیم دیجیتال از گوشی بدون کوچک‌ترین نویز محیطی میکروفون. |
+| **🌐 ارتباط پرسرعت استریم** | `OkHttp WebSocket Client` | برقراری اتصال زنده و مستمر با پروتکل `BidiGenerateContent` هوش مصنوعی جمینای. |
+| **🧠 موتور دوبله هوش مصنوعی** | `gemini-3.5-live-translate-preview` | مدل گفتار به گفتار پیشرفته Google DeepMind برای ترجمه و سنتز طبیعی صدا. |
+| **🔊 پخش صوتی هوشمند** | `AudioTrack (16kHz PCM)` + `AudioManager` | پخش بلادرنگ صدا همراه با قابلیت **Audio Ducking** (کم کردن خودکار صدای فیلم اصلی). |
+| **⚡ سرویس پس‌زمینه** | `LifecycleService` + `Coroutines/Flows` | تضمین اجرای پایدار در پس‌زمینه سیستم عامل و همگام‌سازی لحظه‌ای وضعیت‌ها. |
+| **🎛️ ویجت کنترل شناور** | `WindowManager` + `Jetpack Compose` | ویجت همه‌کاره با هاله نوری پالس‌زننده، بازخورد لمسی **Haptic** و ژست **Double-Tap**. |
+| **🎨 سیستم دیزاین** | `Jetpack Compose + Material 3` | طراحی فوق‌العاده شیشه‌ای **Dark Glassmorphism** با المان‌های سه‌بعدی. |
+| **🔒 ذخیره‌سازی داده‌ها** | `Jetpack DataStore (Preferences)` | ذخیره‌سازی امن و ری‌اکتیو تنظیمات و کلید اختصاصی API. |
 
 ---
 
