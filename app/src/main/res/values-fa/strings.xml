@@ -3,6 +3,8 @@
     <string name="app_name">ALAD</string>
     <string name="app_name_full">ALAD (Live Audio Dubbing Mobile)</string>
     <string name="system_status">وضعیت سیستم</string>
+    <string name="status_connected">دوبله زنده فعال است</string>
+    <string name="status_disconnected">آماده به کار (قطع)</string>
     <string name="target_dubbing_language">زبان دوبله مقصد</string>
     <string name="select_language">انتخاب زبان</string>
     <string name="no_results_found">نتیجه‌ای یافت نشد</string>

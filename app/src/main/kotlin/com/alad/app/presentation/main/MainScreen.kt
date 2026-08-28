@@ -56,7 +56,6 @@ fun MainScreen(
     onDisconnectClicked: () -> Unit
 ) {
     val isConnected by viewModel.isConnected.collectAsState()
-    val statusMessage by viewModel.statusMessage.collectAsState()
     val context = LocalContext.current
     var showHelpDialog by remember { mutableStateOf(false) }
 
@@ -147,25 +146,32 @@ fun MainScreen(
                     Row(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Image(
-                            painter = painterResource(id = R.mipmap.ic_launcher_round),
-                            contentDescription = "ALAD Logo",
+                        Box(
                             modifier = Modifier
-                                .size(38.dp)
-                                .clip(CircleShape)
+                                .size(40.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(Color.White)
                                 .border(
                                     BorderStroke(
-                                        1.dp,
+                                        1.5.dp,
                                         Brush.linearGradient(
                                             listOf(
-                                                Color.White.copy(alpha = 0.5f),
-                                                Color.White.copy(alpha = 0.1f)
+                                                NeonCyan.copy(alpha = 0.8f),
+                                                NeonPurple.copy(alpha = 0.5f)
                                             )
                                         )
                                     ),
-                                    shape = CircleShape
+                                    shape = RoundedCornerShape(12.dp)
                                 )
-                        )
+                                .padding(4.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Image(
+                                painter = painterResource(id = R.mipmap.ic_launcher),
+                                contentDescription = "ALAD Logo",
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        }
 
                         Spacer(modifier = Modifier.width(12.dp))
 
@@ -216,10 +222,16 @@ fun MainScreen(
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
 
-                // Status Indicator
+                // Status Indicator - Real-time Reactive
+                val statusText = if (isConnected) {
+                    stringResource(R.string.status_connected)
+                } else {
+                    stringResource(R.string.status_disconnected)
+                }
+
                 StatusBadge(
                     isConnected = isConnected,
-                    statusText = statusMessage,
+                    statusText = statusText,
                     modifier = Modifier.fillMaxWidth()
                 )
 

@@ -23,6 +23,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
+import com.alad.app.R
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -197,7 +199,7 @@ fun GlassIconButton(
 }
 
 /**
- * Status badge with glowing animated pulsing dot.
+ * Modern Status Card with live pulsing glowing halo, state badge pill, and smooth typography.
  */
 @Composable
 fun StatusBadge(
@@ -205,14 +207,14 @@ fun StatusBadge(
     statusText: String,
     modifier: Modifier = Modifier
 ) {
-    val glowColor = if (isConnected) NeonCyan else NeonCoral
-    
+    val glowColor = if (isConnected) NeonCyan else Color(0xFF64748B)
+
     val infiniteTransition = rememberInfiniteTransition(label = "status_pulse")
     val pulseScale by infiniteTransition.animateFloat(
         initialValue = 1f,
-        targetValue = if (isConnected) 1.6f else 1.2f,
+        targetValue = if (isConnected) 1.8f else 1.2f,
         animationSpec = infiniteRepeatable(
-            animation = tween(if (isConnected) 1000 else 1800, easing = FastOutSlowInEasing),
+            animation = tween(if (isConnected) 900 else 1800, easing = FastOutSlowInEasing),
             repeatMode = RepeatMode.Reverse
         ),
         label = "scale"
@@ -220,47 +222,84 @@ fun StatusBadge(
 
     GlassCard(
         modifier = modifier,
-        shape = RoundedCornerShape(16.dp),
-        backgroundColor = Color(0x500E1726),
-        borderColor = glowColor,
-        borderAlpha = if (isConnected) 0.45f else 0.25f
+        shape = RoundedCornerShape(20.dp),
+        backgroundColor = if (isConnected) Color(0x700B1A2F) else Color(0x550F172A),
+        borderColor = if (isConnected) NeonCyan else Color.White,
+        borderAlpha = if (isConnected) 0.40f else 0.12f
     ) {
         Row(
             modifier = Modifier
-                .padding(horizontal = 16.dp, vertical = 10.dp),
+                .fillMaxWidth()
+                .padding(horizontal = 18.dp, vertical = 14.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Box(
-                modifier = Modifier.size(14.dp),
-                contentAlignment = Alignment.Center
+            Row(
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                // Pulsing Halo
                 Box(
-                    modifier = Modifier
-                        .size(10.dp * pulseScale)
-                        .clip(CircleShape)
-                        .background(glowColor.copy(alpha = if (isConnected) 0.35f else 0.2f))
-                )
-                // Core Dot
-                Box(
-                    modifier = Modifier
-                        .size(8.dp)
-                        .clip(CircleShape)
-                        .background(glowColor)
-                )
+                    modifier = Modifier.size(20.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    // Pulsing Outer Halo
+                    Box(
+                        modifier = Modifier
+                            .size((12 * pulseScale).dp)
+                            .clip(CircleShape)
+                            .background(glowColor.copy(alpha = if (isConnected) 0.35f else 0.15f))
+                    )
+                    // Core Dot
+                    Box(
+                        modifier = Modifier
+                            .size(10.dp)
+                            .clip(CircleShape)
+                            .background(glowColor)
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(14.dp))
+
+                Column {
+                    Text(
+                        text = stringResource(R.string.system_status),
+                        color = TextSecondary,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = statusText,
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = if (isConnected) Color.White else TextSecondary,
+                            fontSize = 15.sp
+                        )
+                    )
+                }
             }
 
-            Spacer(modifier = Modifier.width(10.dp))
-
-            Text(
-                text = statusText,
-                style = MaterialTheme.typography.titleMedium.copy(
-                    fontWeight = FontWeight.Bold,
-                    color = if (isConnected) Color.White else TextSecondary,
-                    fontSize = 15.sp
+            // Dynamic State Badge Pill
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(if (isConnected) NeonCyan.copy(alpha = 0.15f) else Color.White.copy(alpha = 0.08f))
+                    .border(
+                        BorderStroke(
+                            1.dp,
+                            if (isConnected) NeonCyan.copy(alpha = 0.4f) else Color.White.copy(alpha = 0.15f)
+                        ),
+                        RoundedCornerShape(10.dp)
+                    )
+                    .padding(horizontal = 10.dp, vertical = 4.dp)
+            ) {
+                Text(
+                    text = if (isConnected) "LIVE" else "IDLE",
+                    color = if (isConnected) NeonCyan else TextSecondary,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    letterSpacing = 1.sp
                 )
-            )
+            }
         }
     }
 }
