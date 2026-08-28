@@ -11,6 +11,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -134,6 +135,8 @@ fun OverlayContent(onDrag: (Float, Float) -> Unit, onClose: () -> Unit, onToggle
         label = "pulse"
     )
 
+    val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
+
     Row(
         modifier = Modifier
             .clip(CircleShape)
@@ -159,6 +162,14 @@ fun OverlayContent(onDrag: (Float, Float) -> Unit, onClose: () -> Unit, onToggle
             )
             .padding(horizontal = 6.dp, vertical = 6.dp)
             .pointerInput(Unit) {
+                detectTapGestures(
+                    onDoubleTap = {
+                        haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
+                        onToggle(isRunning)
+                    }
+                )
+            }
+            .pointerInput(Unit) {
                 detectDragGestures { change, dragAmount ->
                     change.consume()
                     onDrag(dragAmount.x, dragAmount.y)
@@ -181,7 +192,10 @@ fun OverlayContent(onDrag: (Float, Float) -> Unit, onClose: () -> Unit, onToggle
             }
 
             IconButton(
-                onClick = { onToggle(isRunning) },
+                onClick = { 
+                    haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
+                    onToggle(isRunning) 
+                },
                 modifier = Modifier
                     .size(44.dp)
                     .clip(CircleShape)
@@ -214,9 +228,11 @@ fun OverlayContent(onDrag: (Float, Float) -> Unit, onClose: () -> Unit, onToggle
 
         Spacer(modifier = Modifier.width(6.dp))
 
-        // Close Button
         IconButton(
-            onClick = onClose,
+            onClick = { 
+                haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
+                onClose() 
+            },
             modifier = Modifier
                 .size(34.dp)
                 .clip(CircleShape)

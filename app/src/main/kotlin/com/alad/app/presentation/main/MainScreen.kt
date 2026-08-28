@@ -522,6 +522,7 @@ fun StartStopDubbingButton(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
+    val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
 
     val yOffset by animateDpAsState(
         targetValue = if (isPressed) 4.dp else 0.dp,
@@ -551,7 +552,10 @@ fun StartStopDubbingButton(
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,
-                onClick = onClick
+                onClick = {
+                    haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
+                    onClick()
+                }
             ),
         contentAlignment = Alignment.Center
     ) {
