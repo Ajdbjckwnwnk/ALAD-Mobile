@@ -11,6 +11,7 @@
 
 <p>
   <a href="https://github.com/navidseyedain/ALAD-Mobile/stargazers"><img src="https://img.shields.io/github/stars/navidseyedain/ALAD-Mobile?style=for-the-badge&color=FFD700" alt="Stars"></a>
+  <a href="https://github.com/navidseyedain/ALAD-Mobile/releases/latest"><img src="https://img.shields.io/github/v/release/navidseyedain/ALAD-Mobile?style=for-the-badge&color=blue" alt="Latest Release"></a>
   <a href="https://developer.android.com/"><img src="https://img.shields.io/badge/Android-10%2B-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Android"></a>
   <a href="https://kotlinlang.org/"><img src="https://img.shields.io/badge/Kotlin-1.9%2B-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white" alt="Kotlin"></a>
   <a href="https://aistudio.google.com/"><img src="https://img.shields.io/badge/Powered%20By-Gemini%203.5%20Live-00C896?style=for-the-badge&logo=google&logoColor=white" alt="Gemini"></a>
@@ -19,11 +20,11 @@
 </p>
 
 <p>
-  <b>Watch any video or listen to any podcast. Hear it in your language — instantly.</b><br/>
+  <b>Watch any foreign video or listen to any podcast. Hear it in your native language — instantly.</b><br/>
   No subscriptions. No accounts. 100% free and open-source.
 </p>
 
-<a href="https://github.com/navidseyedain/ALAD-Mobile/releases/latest/download/app-debug.apk"><img src="https://img.shields.io/badge/Download_APK-Latest_Version-FF5722?style=for-the-badge&logo=android&logoColor=white" alt="Download APK" /></a>
+<a href="https://github.com/navidseyedain/ALAD-Mobile/releases/latest"><img src="https://img.shields.io/badge/Download_APK-v1.1.0_Release-FF5722?style=for-the-badge&logo=android&logoColor=white" alt="Download APK" /></a>
 
 <br/>
 
@@ -33,69 +34,96 @@
 
 ## 🌍 What is ALAD Mobile?
 
-**ALAD (AI Live Audio Dubbing)** is a native Android application that breaks the language barrier on your smartphone. It works silently in the background — capturing the internal system audio from your active apps (like YouTube, Spotify, or Netflix), sending it to Google's cutting-edge **Gemini 3.5 Live Translate** model over a persistent WebSocket connection, and playing back the translated voice in real-time.
+**ALAD (AI Live Audio Dubbing)** is a native Android application that completely removes language barriers on mobile devices. Working seamlessly in the background, ALAD captures internal system audio directly from any playing app (YouTube, Netflix, Spotify, Podcasts, Twitch, etc.), sends it to Google's **Gemini 3.5 Live Translate** model via high-speed WebSockets, and plays back fluid, natural translated speech in real time.
 
-Unlike traditional captioning or subtitle tools, ALAD produces **live spoken audio dubbing** — you *hear* the translation, not just read it.
+Unlike traditional subtitle or auto-captioning apps, ALAD produces **live vocal dubbing** — you *listen* to the content naturally without having your eyes glued to the screen.
 
-> **Use case examples:**
-> - 🎬 Watch a Korean drama on your phone without subtitles and hear it in English
-> - 📰 Listen to a German news podcast on Spotify dubbed live in Arabic  
-> - 🎓 Follow a Japanese lecture in Persian in real-time  
-> - 🎮 Watch foreign streamers on Twitch Mobile and understand every word
+> **Use Cases:**
+> - 🎬 **Movies & Series:** Watch foreign cinema (Korean, Japanese, Turkish, Spanish, etc.) and hear real-time spoken translation in your preferred language.
+> - 🎙️ **Podcasts & Music:** Listen to international podcasts and interviews with live voice dubbing.
+> - 🎓 **Online Learning & Lectures:** Follow university courses and tech tutorials without missing spoken nuances.
+> - 🎮 **Live Streams:** Understand international Twitch and YouTube streamers live as they speak.
 
 ---
 
-## 🎬 Screenshots & Demo
+## 📸 Screenshots & Showcase
 
 <div align="center">
-  <img src="docs/Screenshot1.jpg" width="18%" />
-  <img src="docs/Screenshot2.jpg" width="18%" />
-  <img src="docs/Screenshot3.jpg" width="18%" />
-  <img src="docs/Screenshot4.jpg" width="18%" />
-  <img src="docs/Screenshot5.jpg" width="18%" />
+  <table>
+    <tr>
+      <td align="center" width="33%">
+        <img src="docs/1.jpg" width="100%" alt="Main Screen - Ready State" /><br/>
+        <b>🏠 Modern Glassmorphism Dashboard</b>
+      </td>
+      <td align="center" width="33%">
+        <img src="docs/2.jpg" width="100%" alt="Active Dubbing State" /><br/>
+        <b>🔴 Real-Time Waveform & Live Status</b>
+      </td>
+      <td align="center" width="33%">
+        <img src="docs/3.jpg" width="100%" alt="Language Selection" /><br/>
+        <b>🌐 78+ Languages Selector with Flags</b>
+      </td>
+    </tr>
+    <tr>
+      <td align="center" width="33%">
+        <img src="docs/4.jpg" width="100%" alt="Floating Widget Overlay" /><br/>
+        <b>🎛️ Floating Overlay over YouTube/Video</b>
+      </td>
+      <td align="center" width="33%">
+        <img src="docs/5.jpg" width="100%" alt="Settings Screen" /><br/>
+        <b>⚙️ Secure API Key & Config</b>
+      </td>
+      <td align="center" width="33%">
+        <img src="docs/6.jpg" width="100%" alt="How to Use Guide" /><br/>
+        <b>💡 Interactive Onboarding Guide</b>
+      </td>
+    </tr>
+  </table>
 </div>
 
 <br/>
 
-**Watch the Demo Video:**
+### 🎥 Live Demo Video
 
 <div align="center">
-  <video src="https://github.com/user-attachments/assets/d84752e5-3f69-4930-9b5b-a8e7c54ae9e1" controls="controls" width="350">
+  <video src="docs/Demo-ALADMobile.mp4" controls="controls" width="360">
     Your browser does not support the video tag.
   </video>
 </div>
 
 ---
 
-## ✨ Features
+## ✨ Features & Highlights
 
-### 🎙️ Core: Live AI Dubbing
-- **Real-time bidirectional streaming:** Ultra-low latency connection to the Gemini API via WebSocket.
-- **Internal Audio Capture:** Uses Android's MediaProjection API to capture crisp system audio without external background noise.
-- **Smart Audio Ducking:** Automatically lowers the volume of the original media (like a YouTube video) while dubbing is active, so you can clearly hear the translated voice.
-- **Persistent Background Service:** Allows ALAD to dub continuously even if you switch apps or lock your screen.
+### 🎙️ 1. Ultra-Low Latency Live AI Dubbing
+- **Real-Time Bidirectional Streaming:** Direct WebSocket connection (`BidiGenerateContent`) to Gemini Live for instantaneous voice-to-voice translation.
+- **Crystal-Clear Internal Audio Capture:** Uses Android's native `MediaProjection API` to record system audio directly without room noise or mic degradation.
+- **Smart Audio Ducking:** Automatically suppresses the original background media audio while the AI voice is speaking, ensuring pristine clarity.
+- **Persistent Foreground Service:** Keeps dubbing continuously even when multitasking, switching between apps, or turning off the screen.
 
-### 🎛️ Floating Widget Controller
-- **Seamless Multitasking:** Control the dubbing (start/stop) directly from a floating widget that hovers over your active apps. No need to switch back and forth.
-- **Live Visualizer:** The floating widget features a real-time waveform that pulses with the audio frequency, giving you visual feedback that translation is actively working.
+### 🎛️ 2. Smart Floating Overlay Widget
+- **Overlay Multitasking:** Start, pause, and monitor dubbing without leaving your active video or game.
+- **👆 Double-Tap Smart Control:** Double-tap anywhere on the floating widget to immediately pause or resume dubbing on the fly.
+- **Pulsing Audio Halo:** Visual breathing animations reflect active translation states at a glance.
+- **Draggable & Dismissible:** Place the widget anywhere along the screen edges with fluid touch physics.
 
-### 🌐 Universal App Compatibility
-Not limited to one app. If the app plays audio on your phone and allows internal capture — **ALAD can dub it**.
+### 📳 3. Tactile Haptic Feedback
+- **Physical Button Sensation:** Every tap on the 3D start button and floating controller triggers subtle, premium haptic vibrations that give digital interactions a tactile, physical feel.
 
-### 🎨 Dark Glassmorphism & Futuristic UI
-- **Obsidian Dark & Ambient Mesh Glow:** Dynamic background lighting creates depth behind frosted glass containers.
-- **Translucent Glass Cards:** High-definition frosted-glass surfaces with crystalline borders.
-- **Multi-color Neon Waveform:** Real-time audio visualizer pulsing with cyan-to-purple neon gradients.
-- **3D Tactile Action Button:** Interactive start/stop button with spring press physics and glowing ambient aura.
-
-### 🏗️ Modern Android Architecture
-- **100% Kotlin & Jetpack Compose** for a modern, reactive, declarative UI.
-- **Clean Architecture** (Core, Data, Presentation layers).
-- **Coroutines & Flows** for low-latency asynchronous data streaming.
+### 🎨 4. Futuristic Dark Glassmorphism UI
+- **Obsidian Theme & Ambient Glow:** Deep space gradients with radiant cyan and violet neon mesh lighting.
+- **Frosted Glass Cards:** Semi-translucent glass panels with crystalline borders and subtle blur effects.
+- **Dynamic Neon Waveform:** Real-time audio frequency visualizer animating in harmony with your device's audio output.
+- **3D Press Physics:** Start/Stop button with spring mechanics, dynamic shadows, and glowing aura.
 
 ---
 
-## 🗺️ 78 Languages Supported
+## 🗺️ 78 Supported Languages
+
+<details>
+<summary><b>Click to expand full list of 78 supported languages</b></summary>
+
+<br/>
 
 | | | | |
 |---|---|---|---|
@@ -118,37 +146,59 @@ Not limited to one app. If the app plays audio on your phone and allows internal
 | 🇹🇷 Turkish | 🇺🇦 Ukrainian | 🇵🇰 Urdu | 🇺🇿 Uzbek |
 | 🇻🇳 Vietnamese | 🇿🇦 Zulu | | |
 
+</details>
+
 ---
 
-## 🚀 How to Setup & Run
+## 🚀 Getting Started
 
 ### Prerequisites
-1. **Android Device:** Must be running Android 10.0 (API 29) or higher to support Internal Audio Capture.
-2. **Gemini API Key:** You need a free API key from [Google AI Studio](https://aistudio.google.com/).
+1. **Android Device:** Android 10.0 (API 29) or newer (required for system audio capture).
+2. **Gemini API Key:** Get a free API key from [Google AI Studio](https://aistudio.google.com/).
 
-### Installation
-1. Go to the [Releases](https://github.com/navidseyedain/alad-mobile/releases) page.
-2. Download the latest `app-debug.apk`.
-3. Install the APK on your Android device.
+### Quick Installation
+1. Go to the [Releases](https://github.com/navidseyedain/ALAD-Mobile/releases/latest) page.
+2. Download the latest **`ALAD-Mobile-v1.1.0.apk`**.
+3. Install the APK on your device.
+4. Open the app, tap ⚙️ **Settings**, paste your **Gemini API Key**, and tap **Save Settings**.
+5. Pick your target language, tap **Start Dubbing**, and enjoy!
 
 ### Build from Source
-1. Clone the repository: `git clone https://github.com/navidseyedain/alad-mobile.git`
-2. Open the project in **Android Studio**.
-3. Let Gradle sync the project.
-4. Click **Run** to build and install on your connected device.
+```bash
+# Clone the repository
+git clone https://github.com/navidseyedain/ALAD-Mobile.git
+cd ALAD-Mobile
+
+# Open in Android Studio or build via Gradle
+./gradlew assembleRelease
+```
 
 ---
 
-## 🧠 How It Works
+## 🧠 System Architecture
 
-| Component | Technology | Purpose |
+```text
+[ Internal Audio (MediaProjection) ]
+                │
+                ▼ (16kHz PCM Stream)
+[ AudioDubbingForegroundService ]
+                │
+                ▼ (WebSocket BidiGenerateContent)
+[ Google Gemini 3.5 Live Model ]
+                │
+                ▼ (Real-Time Translated Speech Stream)
+[ Low-Latency AudioTrack Player ] ──► [ User Earphones / Speaker ]
+```
+
+| Layer / Component | Technology | Responsibility |
 |---|---|---|
-| **Audio Capture** | `MediaProjection API` | Captures internal system audio directly from any playing app |
-| **AI Model** | `gemini-3.5-live-translate-preview` | Real-time bidirectional speech translation |
-| **Protocol** | `WebSocket (BidiGenerateContent)` | Persistent low-latency streaming to Google's cloud |
-| **Playback** | `AudioTrack / MediaPlayer` | Plays the dubbed audio stream to the user |
-| **Lifecycle** | `Foreground Service` | Keeps the dubbing active even in the background |
-| **Settings Sync** | `Android DataStore` | Stores API key and language preferences securely |
+| **Audio Capture** | `MediaProjection API` + `AudioRecord` | Captures internal system audio with zero mic noise |
+| **Streaming Protocol** | `OkHttp WebSocket` | Persistent low-latency communication with Gemini Live |
+| **AI Translation** | `gemini-3.5-live-translate-preview` | Real-time speech-to-speech translation engine |
+| **Audio Playback** | `AudioTrack (PCM Streaming)` | Ultra-low latency voice rendering with ducking |
+| **Foreground Service** | `LifecycleService` | Manages continuous background operation & sync |
+| **Floating Controller** | `WindowManager` + `Jetpack Compose` | Overlay widget with double-tap & gestures |
+| **UI Framework** | `Jetpack Compose + Material 3` | Modern dark glassmorphic design system |
 
 ---
 
@@ -158,62 +208,68 @@ Not limited to one app. If the app plays audio on your phone and allows internal
 ALAD-Mobile/
 ├── app/src/main/
 │   ├── kotlin/com/alad/app/
-│   │   ├── core/           # WebSocket, Foreground Service, Audio Managers
-│   │   ├── data/           # DataStore repositories
-│   │   ├── presentation/   # Jetpack Compose Screens & ViewModels
-│   │   └── MainActivity.kt # Entry point & Permissions
-│   └── AndroidManifest.xml # Permissions & Services declaration
-├── docs/                   # Screenshots and Video demo for README
-└── build.gradle.kts        # App dependencies
+│   │   ├── core/
+│   │   │   ├── audio/          # Audio capture, ducking & playback managers
+│   │   │   ├── network/        # Gemini WebSocket streaming manager
+│   │   │   └── service/        # Foreground & Floating Widget services
+│   │   ├── data/               # Preferences & DataStore repository
+│   │   ├── presentation/
+│   │   │   ├── main/           # Main screen UI & ViewModel
+│   │   │   └── settings/       # Settings screen UI & ViewModel
+│   │   ├── ui/theme/           # Glassmorphism design system & colors
+│   │   └── MainActivity.kt     # App entry point & permissions flow
+│   └── AndroidManifest.xml     # Permissions & Service declarations
+├── docs/                       # High-res screenshots and demo video
+└── build.gradle.kts            # Build configurations & dependencies
 ```
 
 ---
 
 ## 🔧 Troubleshooting
 
-| Problem | Solution |
-|---|---|
-| **No audio output after starting** | Ensure the target app is playing audio. Check if your API key is valid and has quota remaining. |
-| **"WebSocket connection failed"** | Your API key may be incorrect or your internet connection dropped. Try regenerating it at AI Studio. |
-| **App stops dubbing abruptly** | Android might be killing the background service. Go to App Info > Battery and select "Unrestricted". |
-| **Can't capture audio from some apps** | Some apps (like phone dialers or DRM-protected apps) block internal audio capture at the OS level. |
+| Issue | Root Cause | Solution |
+|---|---|---|
+| **No audio output after starting** | Target app isn't playing audio or API quota is exhausted | Ensure audio is playing in the background app and verify your Gemini API key in AI Studio. |
+| **"WebSocket connection failed"** | Invalid API Key or network timeout | Double check your API key in Settings or test your internet connection. |
+| **Dubbing stops when switching apps** | Android battery optimization killed the background service | Go to *App Info > Battery > Unrestricted*. |
+| **Specific app audio not capturing** | App restricts internal recording (DRM / Phone Calls) | Android OS blocks recording for DRM-protected content (like Netflix protected streams) and phone calls. |
 
 ---
 
 ## 🗺️ Roadmap
 
-- [ ] Publish to Google Play Store
-- [ ] Language auto-detection (detect source language automatically)
-- [ ] Custom voice selection (male/female/neutral)
-- [ ] Support for Bluetooth headset microphone capture
-- [ ] Audio volume balance controls
+- [x] **v1.0.0:** Initial public release (Gemini Live integration & 78 languages)
+- [x] **v1.1.0:** Complete Glassmorphism redesign, Haptic feedback, Double-tap widget controls, and state sync fixes
+- [ ] **v1.2.0:** AI Voice Persona selector (Choose between *Puck, Aoede, Charon, Fenrir, Kore*)
+- [ ] **v1.2.0:** Live Floating Transcript / Subtitle overlay
+- [ ] **v1.3.0:** Automatic source language detection
+- [ ] **v1.4.0:** Bluetooth headset microphone input support
 
 ---
 
 ## 🤝 Contributing
 
-Contributions, issues, and feature requests are welcome!
+Contributions are warmly welcomed! Feel free to report issues, open feature requests, or submit pull requests.
 
-1. Fork the repository
-2. Create your feature branch: `git checkout -b feature/AmazingFeature`
-3. Commit your changes: `git commit -m 'feat: add AmazingFeature'`
-4. Push to the branch: `git push origin feature/AmazingFeature`
+1. Fork the repo
+2. Create a branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'feat: Add AmazingFeature'`)
+4. Push to branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
 ---
 
 ## 📜 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+Distributed under the **MIT License**. See [`LICENSE`](LICENSE) for more details.
 
 ---
 
 ## 🙏 Acknowledgments
 
-- **Google DeepMind** for the Gemini 3.5 Live Translate model
-- **Google AI Studio** for providing free API access
+- **Google DeepMind** for the revolutionary Gemini Live architecture.
+- **Google AI Studio** for generous free developer tier access.
 
 <div align="center">
-If ALAD saved you from reading subtitles for even one video — give it a ⭐<br/>
-Made with ❤️ for language learners, travelers, and curious minds everywhere.
+  <sub>Made with ❤️ by <a href="https://github.com/navidseyedain">Navid Seyedain</a>. If ALAD helped you, please consider giving it a ⭐!</sub>
 </div>
