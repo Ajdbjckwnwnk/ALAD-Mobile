@@ -85,6 +85,12 @@ Unlike traditional subtitle or auto-captioning apps, ALAD produces **live vocal 
 
 ### 🎥 Live Demo Video
 
+
+
+https://github.com/user-attachments/assets/54efbdc7-e19f-49ac-9afd-aafa0d73650a
+
+
+
 <div align="center">
   <video src="docs/Demo-ALADMobile.mp4" controls="controls" width="360">
     Your browser does not support the video tag.
