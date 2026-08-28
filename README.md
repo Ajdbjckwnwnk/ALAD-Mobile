@@ -82,11 +82,16 @@ Unlike traditional captioning or subtitle tools, ALAD produces **live spoken aud
 ### 🌐 Universal App Compatibility
 Not limited to one app. If the app plays audio on your phone and allows internal capture — **ALAD can dub it**.
 
+### 🎨 Dark Glassmorphism & Futuristic UI
+- **Obsidian Dark & Ambient Mesh Glow:** Dynamic background lighting creates depth behind frosted glass containers.
+- **Translucent Glass Cards:** High-definition frosted-glass surfaces with crystalline borders.
+- **Multi-color Neon Waveform:** Real-time audio visualizer pulsing with cyan-to-purple neon gradients.
+- **3D Tactile Action Button:** Interactive start/stop button with spring press physics and glowing ambient aura.
+
 ### 🏗️ Modern Android Architecture
-- **100% Kotlin**
-- **Jetpack Compose** for a beautiful, reactive, and dark-themed UI
-- **Clean Architecture** (Core, Data, Presentation layers)
-- **Coroutines & Flows** for asynchronous data streaming
+- **100% Kotlin & Jetpack Compose** for a modern, reactive, declarative UI.
+- **Clean Architecture** (Core, Data, Presentation layers).
+- **Coroutines & Flows** for low-latency asynchronous data streaming.
 
 ---
 
