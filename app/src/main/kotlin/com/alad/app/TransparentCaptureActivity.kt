@@ -34,6 +34,7 @@ class TransparentCaptureActivity : ComponentActivity() {
     private fun startDubbingService(resultCode: Int, data: Intent) {
         val intent = Intent(this, AudioDubbingForegroundService::class.java).apply {
             action = AudioDubbingForegroundService.ACTION_START
+            putExtra(AudioDubbingForegroundService.EXTRA_CAPTURE_MODE, "SYSTEM")
             putExtra(AudioDubbingForegroundService.EXTRA_RESULT_CODE, resultCode)
             putExtra(AudioDubbingForegroundService.EXTRA_RESULT_DATA, data)
         }

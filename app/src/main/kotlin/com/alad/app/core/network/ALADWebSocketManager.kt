@@ -7,29 +7,38 @@ import okio.ByteString
 import org.json.JSONArray
 import org.json.JSONObject
 
-class ALADWebSocketManager(private val client: OkHttpClient) {
+class ALADWebSocketManager(
+    private val client: OkHttpClient,
+    private val customWsUrl: String? = null
+) {
     private var webSocket: WebSocket? = null
     var onBinaryMessageReceived: ((ByteArray) -> Unit)? = null
     var onStatusChanged: ((String) -> Unit)? = null
 
     companion object {
         private const val TAG = "ALADWebSocketManager"
-        private const val GEMINI_WS_URL = "wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent"
+        private const val DEFAULT_GEMINI_WS_URL = "wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent"
     }
 
     private var isGeminiConnection = true
     private var isSetupComplete = false
 
-    fun connect(apiKey: String, sourceLang: String, targetLang: String) {
-        val finalUrl = "$GEMINI_WS_URL?key=$apiKey"
+    fun connect(
+        apiKey: String,
+        sourceLang: String,
+        targetLang: String,
+        filterNativeSpeech: Boolean = true
+    ) {
+        val baseUrl = if (!customWsUrl.isNullOrBlank()) customWsUrl.trim() else DEFAULT_GEMINI_WS_URL
+        val finalUrl = if (baseUrl.contains("?")) "$baseUrl&key=$apiKey" else "$baseUrl?key=$apiKey"
         val request = Request.Builder().url(finalUrl).build()
         isSetupComplete = false
         
         webSocket = client.newWebSocket(request, object : WebSocketListener() {
             override fun onOpen(webSocket: WebSocket, response: Response) {
-                Log.d(TAG, "Connected to Gemini Live API")
+                Log.d(TAG, "Connected to Gemini Live API via ${if (!customWsUrl.isNullOrBlank()) "Custom Proxy" else "Direct Endpoint"}")
                 onStatusChanged?.invoke("Connected")
-                sendGeminiSetup(targetLang)
+                sendGeminiSetup(targetLang, filterNativeSpeech)
             }
 
             override fun onMessage(webSocket: WebSocket, text: String) {
@@ -88,7 +97,7 @@ class ALADWebSocketManager(private val client: OkHttpClient) {
         })
     }
     
-    private fun sendGeminiSetup(targetLang: String) {
+    private fun sendGeminiSetup(targetLang: String, filterNativeSpeech: Boolean) {
         val targetLangCode = targetLang.split("-")[0]
         val setupPayload = JSONObject().apply {
             put("setup", JSONObject().apply {
@@ -97,9 +106,29 @@ class ALADWebSocketManager(private val client: OkHttpClient) {
                     put("responseModalities", JSONArray().put("AUDIO"))
                     put("translationConfig", JSONObject().apply {
                         put("targetLanguageCode", targetLangCode)
-                        put("echoTargetLanguage", true)
+                        put("echoTargetLanguage", !filterNativeSpeech)
                     })
                 })
+                
+                if (filterNativeSpeech) {
+                    val promptText = """
+                        You are a strict, real-time live audio interpreter.
+                        Target Language: $targetLangCode (e.g., Persian / فارسی).
+                        
+                        CRITICAL FILTERING & TRANSLATION DIRECTIVES:
+                        1. Translate spoken foreign speech (such as English news broadcast, video dialogues, or lectures) directly and fluently into natural spoken $targetLangCode.
+                        2. NATIVE SPEECH SUPPRESSION: If the input speech is ALREADY in $targetLangCode, or if someone nearby in the room speaks in $targetLangCode, YOU MUST COMPLETELY IGNORE IT. Do NOT translate it, do NOT repeat it, and do NOT respond. Stay 100% SILENT.
+                        3. NON-SPEECH SOUNDS: Completely ignore ambient noise, background room chatter, music, coughing, laughter, or breathing.
+                        4. Output ONLY the translated audio stream. Never add commentary or meta-talk.
+                    """.trimIndent()
+
+                    put("systemInstruction", JSONObject().apply {
+                        put("parts", JSONArray().put(JSONObject().apply {
+                            put("text", promptText)
+                        }))
+                    })
+                }
+
                 put("sessionResumption", JSONObject().apply {
                     put("handle", JSONObject.NULL)
                 })

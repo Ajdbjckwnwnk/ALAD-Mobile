@@ -36,6 +36,7 @@ class AudioDubbingForegroundService : Service() {
         const val ACTION_STOP = "ACTION_STOP"
         const val EXTRA_RESULT_CODE = "EXTRA_RESULT_CODE"
         const val EXTRA_RESULT_DATA = "EXTRA_RESULT_DATA"
+        const val EXTRA_CAPTURE_MODE = "EXTRA_CAPTURE_MODE"
         private const val TAG = "DubbingService"
         
         val isRunning = MutableStateFlow(false)
@@ -57,12 +58,26 @@ class AudioDubbingForegroundService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val action = intent?.action
+        val captureMode = intent?.getStringExtra(EXTRA_CAPTURE_MODE) ?: "MIC"
         
         when (action) {
             ACTION_START -> {
                 val notification = createNotification()
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    startForeground(NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION)
+                    val serviceType = if (captureMode == "SYSTEM") {
+                        ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION
+                    } else {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                            ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE
+                        } else {
+                            0
+                        }
+                    }
+                    if (serviceType != 0) {
+                        startForeground(NOTIFICATION_ID, notification, serviceType)
+                    } else {
+                        startForeground(NOTIFICATION_ID, notification)
+                    }
                 } else {
                     startForeground(NOTIFICATION_ID, notification)
                 }
@@ -70,9 +85,7 @@ class AudioDubbingForegroundService : Service() {
                 val resultCode = intent.getIntExtra(EXTRA_RESULT_CODE, 0)
                 val data = intent.getParcelableExtra<Intent>(EXTRA_RESULT_DATA)
                 
-                if (resultCode != 0 && data != null) {
-                    startDubbing(resultCode, data)
-                }
+                startDubbing(captureMode, resultCode, data)
             }
             ACTION_STOP -> {
                 stopDubbing()
@@ -84,10 +97,12 @@ class AudioDubbingForegroundService : Service() {
         return START_NOT_STICKY
     }
 
-    private fun startDubbing(resultCode: Int, data: Intent) {
+    private fun startDubbing(captureMode: String, resultCode: Int, data: Intent?) {
         isRunning.value = true
-        val projectionManager = getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
-        mediaProjection = projectionManager.getMediaProjection(resultCode, data)
+        if (captureMode == "SYSTEM" && data != null && resultCode != 0) {
+            val projectionManager = getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
+            mediaProjection = projectionManager.getMediaProjection(resultCode, data)
+        }
         
         serviceScope.launch {
             val repository = UserPreferencesRepository(applicationContext)
@@ -95,8 +110,35 @@ class AudioDubbingForegroundService : Service() {
             val apiKey = repository.apiKeyFlow.first()
             val targetLang = repository.targetLangFlow.first()
             val volumeRatio = repository.volumeRatioFlow.first()
-            
-            webSocketManager = ALADWebSocketManager(OkHttpClient())
+            val filterNativeSpeech = repository.filterNativeSpeechFlow.first()
+            val vadEnabled = repository.vadEnabledFlow.first()
+            val noiseGateThreshold = repository.noiseGateThresholdFlow.first()
+            val customWsUrl = repository.customWsUrlFlow.first()
+            val proxyEnabled = repository.proxyEnabledFlow.first()
+            val proxyHost = repository.proxyHostFlow.first()
+            val proxyPort = repository.proxyPortFlow.first()
+            val proxyType = repository.proxyTypeFlow.first()
+
+            // Configure OkHttpClient with optional Proxy
+            val clientBuilder = OkHttpClient.Builder()
+                .readTimeout(0, java.util.concurrent.TimeUnit.MILLISECONDS)
+                .pingInterval(20, java.util.concurrent.TimeUnit.SECONDS)
+
+            if (proxyEnabled && proxyHost.isNotBlank() && proxyPort > 0) {
+                try {
+                    val pType = if (proxyType.equals("HTTP", ignoreCase = true)) {
+                        java.net.Proxy.Type.HTTP
+                    } else {
+                        java.net.Proxy.Type.SOCKS
+                    }
+                    clientBuilder.proxy(java.net.Proxy(pType, java.net.InetSocketAddress(proxyHost.trim(), proxyPort)))
+                    Log.d(TAG, "Configured proxy $proxyType://$proxyHost:$proxyPort")
+                } catch (e: Exception) {
+                    Log.e(TAG, "Failed to configure proxy", e)
+                }
+            }
+
+            webSocketManager = ALADWebSocketManager(clientBuilder.build(), customWsUrl)
             
             audioPlayerManager = AudioPlayerManager(applicationContext)
             audioPlayerManager?.start()
@@ -104,7 +146,7 @@ class AudioDubbingForegroundService : Service() {
             
             webSocketManager?.onStatusChanged = { status ->
                 android.os.Handler(android.os.Looper.getMainLooper()).post {
-                    android.widget.Toast.makeText(applicationContext, "WS Status: $status", android.widget.Toast.LENGTH_LONG).show()
+                    android.widget.Toast.makeText(applicationContext, "WS: $status", android.widget.Toast.LENGTH_SHORT).show()
                 }
             }
             
@@ -112,8 +154,7 @@ class AudioDubbingForegroundService : Service() {
                 audioPlayerManager?.playAudioData(audioChunk)
             }
             
-            // sourceLang is no longer used for Bidi Setup
-            webSocketManager?.connect(apiKey, "", targetLang)
+            webSocketManager?.connect(apiKey, "", targetLang, filterNativeSpeech)
             
             langObservationJob?.cancel()
             langObservationJob = serviceScope.launch {
@@ -123,8 +164,9 @@ class AudioDubbingForegroundService : Service() {
                         firstEmit = false
                     } else {
                         val currentKey = repository.apiKeyFlow.first()
+                        val currentFilter = repository.filterNativeSpeechFlow.first()
                         webSocketManager?.disconnect()
-                        webSocketManager?.connect(currentKey, "", newLang)
+                        webSocketManager?.connect(currentKey, "", newLang, currentFilter)
                     }
                 }
             }
@@ -132,27 +174,41 @@ class AudioDubbingForegroundService : Service() {
             audioCaptureManager = AudioCaptureManager()
             val appUid = applicationInfo.uid
             
-            mediaProjection?.let { projection ->
-                audioCaptureManager?.startCapture(projection, appUid) { pcmData ->
-                    webSocketManager?.sendAudioData(pcmData)
-                    
-                    // Calculate RMS amplitude
-                    var sum = 0.0
-                    for (i in pcmData.indices step 2) {
-                        if (i + 1 < pcmData.size) {
-                            val sample = (pcmData[i].toInt() and 0xFF) or (pcmData[i+1].toInt() shl 8)
-                            val signedSample = sample.toShort().toFloat()
-                            sum += signedSample * signedSample
-                        }
+            val onAudioChunk: (ByteArray) -> Unit = { pcmData ->
+                webSocketManager?.sendAudioData(pcmData)
+                
+                // Calculate RMS amplitude for visualizer
+                var sum = 0.0
+                for (i in pcmData.indices step 2) {
+                    if (i + 1 < pcmData.size) {
+                        val sample = (pcmData[i].toInt() and 0xFF) or (pcmData[i+1].toInt() shl 8)
+                        val signedSample = sample.toShort().toFloat()
+                        sum += signedSample * signedSample
                     }
-                    val rms = if (pcmData.isNotEmpty()) sqrt(sum / (pcmData.size / 2)).toFloat() else 0f
-                    // Normalize and boost slightly for better visual effect (x3)
-                    val normalized = (rms / 32767f * 3f).coerceIn(0f, 1f)
-                    
-                    // Apply low-pass filter for smooth animation
-                    val current = audioAmplitude.value
-                    audioAmplitude.value = current * 0.5f + normalized * 0.5f
                 }
+                val rms = if (pcmData.isNotEmpty()) sqrt(sum / (pcmData.size / 2)).toFloat() else 0f
+                val normalized = (rms / 32767f * 3f).coerceIn(0f, 1f)
+                val current = audioAmplitude.value
+                audioAmplitude.value = current * 0.5f + normalized * 0.5f
+            }
+
+            if (captureMode == "SYSTEM") {
+                mediaProjection?.let { projection ->
+                    audioCaptureManager?.startCaptureSystem(
+                        projection,
+                        appUid,
+                        enableVad = vadEnabled,
+                        noiseGateThreshold = noiseGateThreshold,
+                        onAudioData = onAudioChunk
+                    )
+                }
+            } else {
+                audioCaptureManager?.startCaptureMic(
+                    enableNoiseSuppression = true,
+                    enableVad = vadEnabled,
+                    noiseGateThreshold = noiseGateThreshold,
+                    onAudioData = onAudioChunk
+                )
             }
         }
     }

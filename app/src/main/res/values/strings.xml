@@ -24,6 +24,30 @@
     <string name="get_api_key">Get Gemini API Key</string>
     <string name="api_key_guide">To use this app, you need a free Gemini API Key from Google AI Studio.</string>
     <string name="help_title">How to use ALAD</string>
-    <string name="help_content">1. Go to settings and set your Gemini API Key.\n2. Choose your target language.\n3. Tap \'Start Dubbing\' to begin real-time translation.\n4. Use the floating widget to control dubbing while using other apps.</string>
+    <string name="help_content">1. Go to settings and set your Gemini API Key.\n2. Choose audio source (Internal Audio vs Microphone/TV).\n3. Choose your target language.\n4. Tap \'Start Dubbing\' to begin real-time translation.\n5. Use the floating widget to control dubbing while using other apps.</string>
     <string name="close">Close</string>
+
+    <!-- Capture Modes -->
+    <string name="audio_source">Audio Input Source</string>
+    <string name="mode_mic">Microphone / TV News</string>
+    <string name="mode_mic_desc">Listen to ambient sound, TV broadcast, lectures or speakers in the room</string>
+    <string name="mode_system">Internal Media Audio</string>
+    <string name="mode_system_desc">Translate audio from YouTube, Netflix, games or apps running on this phone</string>
+
+    <!-- Proxy and Network -->
+    <string name="proxy_network_settings">Proxy &amp; Network (Bypass Filtering)</string>
+    <string name="enable_proxy">Enable In-App Proxy</string>
+    <string name="enable_proxy_desc">Route Gemini Live WebSocket through local or remote SOCKS5/HTTP proxy</string>
+    <string name="proxy_host">Proxy Host (e.g., 127.0.0.1)</string>
+    <string name="proxy_port">Proxy Port (e.g., 10808)</string>
+    <string name="proxy_type">Proxy Type</string>
+    <string name="custom_ws_url">Custom Base WebSocket URL (Optional)</string>
+    <string name="custom_ws_url_desc">Use a Cloudflare Worker or custom reverse proxy to connect without VPN</string>
+
+    <!-- AI & Noise Filtering -->
+    <string name="ai_audio_filter_settings">AI &amp; Sound Optimization</string>
+    <string name="filter_native_speech">Filter Out Native Speech</string>
+    <string name="filter_native_speech_desc">Ignore background chatter in the target language (e.g. Persian) during foreign broadcasts</string>
+    <string name="vad_battery_saver">Smart VAD &amp; Battery Saver</string>
+    <string name="vad_battery_saver_desc">Pause streaming during silence to save battery, mobile data, and API quota</string>
 </resources>

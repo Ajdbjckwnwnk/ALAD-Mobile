@@ -13,7 +13,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.Key
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
@@ -42,10 +47,18 @@ fun SettingsScreen(viewModel: SettingsViewModel, onBack: () -> Unit = {}) {
     val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
     val apiKey by viewModel.apiKey.collectAsState()
+    val customWsUrl by viewModel.customWsUrl.collectAsState()
+    val proxyEnabled by viewModel.proxyEnabled.collectAsState()
+    val proxyHost by viewModel.proxyHost.collectAsState()
+    val proxyPort by viewModel.proxyPort.collectAsState()
+    val proxyType by viewModel.proxyType.collectAsState()
+    val filterNativeSpeech by viewModel.filterNativeSpeech.collectAsState()
+    val vadEnabled by viewModel.vadEnabled.collectAsState()
 
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     var apiKeyVisible by remember { mutableStateOf(false) }
+    val scrollState = rememberScrollState()
 
     AmbientBackground {
         Scaffold(
@@ -82,6 +95,7 @@ fun SettingsScreen(viewModel: SettingsViewModel, onBack: () -> Unit = {}) {
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
+                    .verticalScroll(scrollState)
                     .padding(horizontal = 20.dp, vertical = 12.dp),
                 verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
@@ -222,7 +236,273 @@ fun SettingsScreen(viewModel: SettingsViewModel, onBack: () -> Unit = {}) {
                     }
                 }
 
-                Spacer(modifier = Modifier.weight(1f))
+                // Proxy & Network Configuration Card (Iran Filtering Bypass)
+                GlassCard(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(24.dp),
+                    borderColor = NeonBlue,
+                    borderAlpha = 0.25f
+                ) {
+                    Column(
+                        modifier = Modifier.padding(20.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .clip(CircleShape)
+                                    .background(NeonBlue.copy(alpha = 0.15f)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Language,
+                                    contentDescription = null,
+                                    tint = NeonBlue,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.width(12.dp))
+
+                            Column {
+                                Text(
+                                    text = stringResource(R.string.proxy_network_settings),
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White,
+                                    fontSize = 16.sp
+                                )
+                                Text(
+                                    text = "SOCKS5 / HTTP / Reverse Proxy",
+                                    color = TextSecondary,
+                                    fontSize = 12.sp
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // In-app Proxy Toggle
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = stringResource(R.string.enable_proxy),
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = Color.White,
+                                    fontSize = 14.sp
+                                )
+                                Text(
+                                    text = stringResource(R.string.enable_proxy_desc),
+                                    color = TextSecondary,
+                                    fontSize = 12.sp
+                                )
+                            }
+                            Switch(
+                                checked = proxyEnabled,
+                                onCheckedChange = viewModel::updateProxyEnabled,
+                                colors = SwitchDefaults.colors(
+                                    checkedThumbColor = NeonBlue,
+                                    checkedTrackColor = NeonBlue.copy(alpha = 0.4f)
+                                )
+                            )
+                        }
+
+                        if (proxyEnabled) {
+                            Spacer(modifier = Modifier.height(12.dp))
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                OutlinedTextField(
+                                    value = proxyHost,
+                                    onValueChange = viewModel::updateProxyHost,
+                                    placeholder = { Text("127.0.0.1", color = TextSecondary.copy(alpha = 0.6f)) },
+                                    label = { Text("Host", color = TextSecondary) },
+                                    modifier = Modifier.weight(2f),
+                                    shape = RoundedCornerShape(14.dp),
+                                    colors = OutlinedTextFieldDefaults.colors(
+                                        focusedContainerColor = Color(0x25FFFFFF),
+                                        unfocusedContainerColor = Color(0x12FFFFFF),
+                                        focusedBorderColor = NeonBlue,
+                                        unfocusedBorderColor = Color.White.copy(alpha = 0.15f),
+                                        focusedTextColor = Color.White,
+                                        unfocusedTextColor = Color.White
+                                    )
+                                )
+
+                                OutlinedTextField(
+                                    value = if (proxyPort > 0) proxyPort.toString() else "",
+                                    onValueChange = { portStr ->
+                                        val port = portStr.filter { it.isDigit() }.toIntOrNull() ?: 0
+                                        viewModel.updateProxyPort(port)
+                                    },
+                                    placeholder = { Text("10808", color = TextSecondary.copy(alpha = 0.6f)) },
+                                    label = { Text("Port", color = TextSecondary) },
+                                    modifier = Modifier.weight(1f),
+                                    shape = RoundedCornerShape(14.dp),
+                                    colors = OutlinedTextFieldDefaults.colors(
+                                        focusedContainerColor = Color(0x25FFFFFF),
+                                        unfocusedContainerColor = Color(0x12FFFFFF),
+                                        focusedBorderColor = NeonBlue,
+                                        unfocusedBorderColor = Color.White.copy(alpha = 0.15f),
+                                        focusedTextColor = Color.White,
+                                        unfocusedTextColor = Color.White
+                                    )
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // Custom WebSocket URL / Reverse Proxy
+                        Text(
+                            text = stringResource(R.string.custom_ws_url),
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color.White,
+                            fontSize = 14.sp
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = stringResource(R.string.custom_ws_url_desc),
+                            color = TextSecondary,
+                            fontSize = 12.sp
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        OutlinedTextField(
+                            value = customWsUrl,
+                            onValueChange = viewModel::updateCustomWsUrl,
+                            placeholder = { Text("wss://my-proxy.workers.dev/ws/...", color = TextSecondary.copy(alpha = 0.6f)) },
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(14.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedContainerColor = Color(0x25FFFFFF),
+                                unfocusedContainerColor = Color(0x12FFFFFF),
+                                focusedBorderColor = NeonBlue,
+                                unfocusedBorderColor = Color.White.copy(alpha = 0.15f),
+                                focusedTextColor = Color.White,
+                                unfocusedTextColor = Color.White
+                            )
+                        )
+                    }
+                }
+
+                // AI & Noise Optimization Card
+                GlassCard(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(24.dp),
+                    borderColor = NeonPurple,
+                    borderAlpha = 0.25f
+                ) {
+                    Column(
+                        modifier = Modifier.padding(20.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .clip(CircleShape)
+                                    .background(NeonPurple.copy(alpha = 0.15f)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.AutoAwesome,
+                                    contentDescription = null,
+                                    tint = NeonPurple,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.width(12.dp))
+
+                            Column {
+                                Text(
+                                    text = stringResource(R.string.ai_audio_filter_settings),
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White,
+                                    fontSize = 16.sp
+                                )
+                                Text(
+                                    text = "Smart VAD & Native Suppression",
+                                    color = TextSecondary,
+                                    fontSize = 12.sp
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // Filter Native Speech Toggle
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = stringResource(R.string.filter_native_speech),
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = Color.White,
+                                    fontSize = 14.sp
+                                )
+                                Text(
+                                    text = stringResource(R.string.filter_native_speech_desc),
+                                    color = TextSecondary,
+                                    fontSize = 12.sp
+                                )
+                            }
+                            Switch(
+                                checked = filterNativeSpeech,
+                                onCheckedChange = viewModel::updateFilterNativeSpeech,
+                                colors = SwitchDefaults.colors(
+                                    checkedThumbColor = NeonPurple,
+                                    checkedTrackColor = NeonPurple.copy(alpha = 0.4f)
+                                )
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // VAD / Battery Saver Toggle
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = stringResource(R.string.vad_battery_saver),
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = Color.White,
+                                    fontSize = 14.sp
+                                )
+                                Text(
+                                    text = stringResource(R.string.vad_battery_saver_desc),
+                                    color = TextSecondary,
+                                    fontSize = 12.sp
+                                )
+                            }
+                            Switch(
+                                checked = vadEnabled,
+                                onCheckedChange = viewModel::updateVadEnabled,
+                                colors = SwitchDefaults.colors(
+                                    checkedThumbColor = NeonPurple,
+                                    checkedTrackColor = NeonPurple.copy(alpha = 0.4f)
+                                )
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
 
                 // Save Settings Button
                 val interactionSource = remember { MutableInteractionSource() }

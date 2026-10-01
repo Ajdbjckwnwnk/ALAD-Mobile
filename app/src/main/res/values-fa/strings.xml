@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">ALAD</string>
-    <string name="app_name_full">ALAD (Live Audio Dubbing Mobile)</string>
+    <string name="app_name_full">الاد (دوبله زنده صوتی با هوش مصنوعی)</string>
     <string name="system_status">وضعیت سیستم</string>
     <string name="status_connected">دوبله زنده فعال است</string>
     <string name="status_disconnected">آماده به کار (قطع)</string>
@@ -24,6 +24,30 @@
     <string name="get_api_key">دریافت کلید API جمینای</string>
     <string name="api_key_guide">برای استفاده از برنامه، باید یک کلید API رایگان از Google AI Studio دریافت کنید.</string>
     <string name="help_title">راهنمای استفاده از ALAD</string>
-    <string name="help_content">۱. به تنظیمات بروید و کلید API خود را وارد کنید.\n۲. زبان مقصد را انتخاب کنید.\n۳. روی «شروع دوبله» کلیک کنید تا ترجمه همزمان آغاز شود.\n۴. از ویجت شناور برای کنترل برنامه هنگام استفاده از برنامه‌های دیگر استفاده کنید.</string>
+    <string name="help_content">۱. به تنظیمات بروید و کلید API خود را وارد کنید.\n۲. منبع صوتی را انتخاب کنید (صدای تلویزیون/میکروفون یا صدای داخلی گوشی).\n۳. زبان مقصد را انتخاب کنید.\n۴. روی «شروع دوبله» کلیک کنید تا ترجمه همزمان آغاز شود.\n۵. از ویجت شناور برای کنترل برنامه در پس‌زمینه استفاده کنید.</string>
     <string name="close">بستن</string>
+
+    <!-- منبع صدا -->
+    <string name="audio_source">منبع ورودی صدا</string>
+    <string name="mode_mic">میکروفون / اخبار تلویزیون</string>
+    <string name="mode_mic_desc">شنیدن صدای محیط، پخش زنده تلویزیون، کلاس درس یا اسپیکرهای اتاق</string>
+    <string name="mode_system">صدای داخلی و رسانه‌های گوشی</string>
+    <string name="mode_system_desc">دوبله مستقیم صدای ویدیوهای یوتیوب، فیلم‌ها، بازی‌ها یا برنامه‌های داخل گوشی</string>
+
+    <!-- پروکسی و شبکه -->
+    <string name="proxy_network_settings">تنظیمات پروکسی و دور زدن فیلترینگ</string>
+    <string name="enable_proxy">فعال‌سازی پروکسی درون‌برنامه‌ای</string>
+    <string name="enable_proxy_desc">هدایت ترافیک وب‌سوکت جمینای از طریق پروکسی محلی (v2rayNG/Nekobox) یا ریموت</string>
+    <string name="proxy_host">آدرس هاست پروکسی (مثلاً 127.0.0.1)</string>
+    <string name="proxy_port">پورت پروکسی (مثلاً 10808)</string>
+    <string name="proxy_type">نوع پروتکل پروکسی</string>
+    <string name="custom_ws_url">آدرس اختصاصی WebSocket / ریورس پروکسی (اختیاری)</string>
+    <string name="custom_ws_url_desc">اتصال از طریق ورکر Cloudflare یا سرور شخصی جهت کارکرد بدون فیلترشکن</string>
+
+    <!-- فیلتر هوشمند و نویز -->
+    <string name="ai_audio_filter_settings">بهینه‌سازی صدا و هوش مصنوعی</string>
+    <string name="filter_native_speech">فیلتر صحبت‌های هم‌زبان در محیط</string>
+    <string name="filter_native_speech_desc">نادیده گرفتن صحبت‌ها و سروصدای افراد به زبان فارسی در محیط هنگام تماشای اخبار خارجی</string>
+    <string name="vad_battery_saver">تشخیص هوشمند سکوت و کاهش مصرف باتری (VAD)</string>
+    <string name="vad_battery_saver_desc">توقف ارسال فریم‌های صوتی در زمان سکوت جهت صرفه‌جویی شدید در باتری، حجم اینترنت و سهمیه API</string>
 </resources>

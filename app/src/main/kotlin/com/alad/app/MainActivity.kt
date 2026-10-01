@@ -107,7 +107,12 @@ class MainActivity : ComponentActivity() {
         }
 
         if (missingPermissions.isEmpty()) {
-            launchScreenCapture()
+            val currentMode = mainViewModel.captureMode.value
+            if (currentMode == com.alad.app.data.repository.CaptureMode.SYSTEM) {
+                launchScreenCapture()
+            } else {
+                startDubbingServiceMic()
+            }
         } else {
             permissionLauncher.launch(missingPermissions.toTypedArray())
         }
@@ -118,9 +123,18 @@ class MainActivity : ComponentActivity() {
         screenCaptureLauncher.launch(mediaProjectionManager.createScreenCaptureIntent())
     }
 
+    private fun startDubbingServiceMic() {
+        val intent = Intent(this, AudioDubbingForegroundService::class.java).apply {
+            action = AudioDubbingForegroundService.ACTION_START
+            putExtra(AudioDubbingForegroundService.EXTRA_CAPTURE_MODE, "MIC")
+        }
+        ContextCompat.startForegroundService(this, intent)
+    }
+
     private fun startDubbingService(resultCode: Int, data: Intent) {
         val intent = Intent(this, AudioDubbingForegroundService::class.java).apply {
             action = AudioDubbingForegroundService.ACTION_START
+            putExtra(AudioDubbingForegroundService.EXTRA_CAPTURE_MODE, "SYSTEM")
             putExtra(AudioDubbingForegroundService.EXTRA_RESULT_CODE, resultCode)
             putExtra(AudioDubbingForegroundService.EXTRA_RESULT_DATA, data)
         }

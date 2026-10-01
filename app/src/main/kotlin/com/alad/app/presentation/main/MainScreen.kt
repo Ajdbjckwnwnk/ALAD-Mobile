@@ -21,6 +21,9 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Stop
+import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.filled.PhoneAndroid
+import com.alad.app.data.repository.CaptureMode
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -240,6 +243,151 @@ fun MainScreen(
                     isConnected = isConnected,
                     modifier = Modifier.padding(vertical = 8.dp)
                 )
+
+                // Audio Input Source Selection Card
+                val captureMode by viewModel.captureMode.collectAsState()
+                val proxyEnabled by viewModel.proxyEnabled.collectAsState()
+                val vadEnabled by viewModel.vadEnabled.collectAsState()
+                val filterNativeSpeech by viewModel.filterNativeSpeech.collectAsState()
+
+                GlassCard(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(22.dp),
+                    borderColor = NeonBlue,
+                    borderAlpha = 0.25f
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.audio_source),
+                            color = TextSecondary,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+
+                        Spacer(modifier = Modifier.height(10.dp))
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            // Mode 1: Microphone (TV News / Room)
+                            val isMic = captureMode == CaptureMode.MIC
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .clip(RoundedCornerShape(14.dp))
+                                    .background(
+                                        if (isMic) Brush.horizontalGradient(listOf(NeonCyan.copy(alpha = 0.25f), NeonBlue.copy(alpha = 0.25f)))
+                                        else Color(0x12FFFFFF)
+                                    )
+                                    .border(
+                                        BorderStroke(
+                                            1.dp,
+                                            if (isMic) NeonCyan else Color.White.copy(alpha = 0.1f)
+                                        ),
+                                        shape = RoundedCornerShape(14.dp)
+                                    )
+                                    .clickable { viewModel.updateCaptureMode(CaptureMode.MIC) }
+                                    .padding(vertical = 12.dp, horizontal = 8.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Icon(
+                                        imageVector = Icons.Default.Mic,
+                                        contentDescription = null,
+                                        tint = if (isMic) NeonCyan else TextSecondary,
+                                        modifier = Modifier.size(22.dp)
+                                    )
+                                    Spacer(modifier = Modifier.height(6.dp))
+                                    Text(
+                                        text = stringResource(R.string.mode_mic),
+                                        color = if (isMic) Color.White else TextSecondary,
+                                        fontSize = 12.sp,
+                                        fontWeight = if (isMic) FontWeight.Bold else FontWeight.Normal
+                                    )
+                                }
+                            }
+
+                            // Mode 2: System Media Audio (YouTube / Videos)
+                            val isSystem = captureMode == CaptureMode.SYSTEM
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .clip(RoundedCornerShape(14.dp))
+                                    .background(
+                                        if (isSystem) Brush.horizontalGradient(listOf(NeonPurple.copy(alpha = 0.25f), NeonViolet.copy(alpha = 0.25f)))
+                                        else Color(0x12FFFFFF)
+                                    )
+                                    .border(
+                                        BorderStroke(
+                                            1.dp,
+                                            if (isSystem) NeonPurple else Color.White.copy(alpha = 0.1f)
+                                        ),
+                                        shape = RoundedCornerShape(14.dp)
+                                    )
+                                    .clickable { viewModel.updateCaptureMode(CaptureMode.SYSTEM) }
+                                    .padding(vertical = 12.dp, horizontal = 8.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Icon(
+                                        imageVector = Icons.Default.PhoneAndroid,
+                                        contentDescription = null,
+                                        tint = if (isSystem) NeonPurple else TextSecondary,
+                                        modifier = Modifier.size(22.dp)
+                                    )
+                                    Spacer(modifier = Modifier.height(6.dp))
+                                    Text(
+                                        text = stringResource(R.string.mode_system),
+                                        color = if (isSystem) Color.White else TextSecondary,
+                                        fontSize = 12.sp,
+                                        fontWeight = if (isSystem) FontWeight.Bold else FontWeight.Normal
+                                    )
+                                }
+                            }
+                        }
+
+                        // Feature status badges
+                        Spacer(modifier = Modifier.height(10.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            if (vadEnabled) {
+                                Box(
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(6.dp))
+                                        .background(Color(0x1800FFB2))
+                                        .padding(horizontal = 6.dp, vertical = 2.dp)
+                                ) {
+                                    Text(text = "⚡ VAD بهینه", color = Color(0xFF00FFB2), fontSize = 10.sp, fontWeight = FontWeight.SemiBold)
+                                }
+                            }
+                            if (filterNativeSpeech) {
+                                Box(
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(6.dp))
+                                        .background(Color(0x18BD00FF))
+                                        .padding(horizontal = 6.dp, vertical = 2.dp)
+                                ) {
+                                    Text(text = "🛡️ فیلتر فارسی", color = Color(0xFFE280FF), fontSize = 10.sp, fontWeight = FontWeight.SemiBold)
+                                }
+                            }
+                            if (proxyEnabled) {
+                                Box(
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(6.dp))
+                                        .background(Color(0x1800B2FF))
+                                        .padding(horizontal = 6.dp, vertical = 2.dp)
+                                ) {
+                                    Text(text = "🌐 پروکسی", color = Color(0xFF80D4FF), fontSize = 10.sp, fontWeight = FontWeight.SemiBold)
+                                }
+                            }
+                        }
+                    }
+                }
 
                 // Language Selection Card
                 val targetLang by viewModel.targetLang.collectAsState()

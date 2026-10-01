@@ -3,6 +3,7 @@ package com.alad.app.presentation.main
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.alad.app.data.repository.CaptureMode
 import com.alad.app.data.repository.UserPreferencesRepository
 import com.alad.app.core.service.AudioDubbingForegroundService
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,12 +26,28 @@ class MainViewModel(private val repository: UserPreferencesRepository) : ViewMod
     val targetLang: StateFlow<String> = repository.targetLangFlow
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "fa")
 
+    val captureMode: StateFlow<CaptureMode> = repository.captureModeFlow
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), CaptureMode.MIC)
+
+    val proxyEnabled: StateFlow<Boolean> = repository.proxyEnabledFlow
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+
+    val vadEnabled: StateFlow<Boolean> = repository.vadEnabledFlow
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
+
+    val filterNativeSpeech: StateFlow<Boolean> = repository.filterNativeSpeechFlow
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
+
     fun updateSourceLang(lang: String) {
         viewModelScope.launch { repository.updateSourceLang(lang) }
     }
 
     fun updateTargetLang(lang: String) {
         viewModelScope.launch { repository.updateTargetLang(lang) }
+    }
+
+    fun updateCaptureMode(mode: CaptureMode) {
+        viewModelScope.launch { repository.updateCaptureMode(mode) }
     }
 
     fun updateStatus(status: String) {

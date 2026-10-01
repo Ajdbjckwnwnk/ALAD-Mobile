@@ -92,10 +92,21 @@ class OverlayWidgetService : LifecycleService() {
                                 }
                                 startService(intent)
                             } else {
-                                // Start Dubbing via transparent activity
-                                val intent = Intent(this@OverlayWidgetService, com.alad.app.TransparentCaptureActivity::class.java)
-                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                startActivity(intent)
+                                kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
+                                    val repo = com.alad.app.data.repository.UserPreferencesRepository(applicationContext)
+                                    val mode = kotlinx.coroutines.flow.first(repo.captureModeFlow)
+                                    if (mode == com.alad.app.data.repository.CaptureMode.SYSTEM) {
+                                        val intent = Intent(this@OverlayWidgetService, com.alad.app.TransparentCaptureActivity::class.java)
+                                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                        startActivity(intent)
+                                    } else {
+                                        val intent = Intent(this@OverlayWidgetService, AudioDubbingForegroundService::class.java).apply {
+                                            action = AudioDubbingForegroundService.ACTION_START
+                                            putExtra(AudioDubbingForegroundService.EXTRA_CAPTURE_MODE, "MIC")
+                                        }
+                                        androidx.core.content.ContextCompat.startForegroundService(this@OverlayWidgetService, intent)
+                                    }
+                                }
                             }
                         }
                     )
