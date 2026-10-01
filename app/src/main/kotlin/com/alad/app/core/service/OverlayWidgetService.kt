@@ -96,7 +96,7 @@ class OverlayWidgetService : LifecycleService() {
                             } else {
                                 kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
                                     val repo = com.alad.app.data.repository.UserPreferencesRepository(applicationContext)
-                                    val mode = kotlinx.coroutines.flow.first(repo.captureModeFlow)
+                                    val mode = repo.captureModeFlow.first()
                                     if (mode == com.alad.app.data.repository.CaptureMode.SYSTEM) {
                                         val intent = Intent(this@OverlayWidgetService, com.alad.app.TransparentCaptureActivity::class.java)
                                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
