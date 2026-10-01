@@ -4,9 +4,12 @@ on:
   push:
     branches: [ "main", "master" ]
     tags:
-      - 'v*' # Trigger release on tags matching v*, e.g., v1.0.0
+      - 'v*'
   pull_request:
     branches: [ "main", "master" ]
+
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -27,14 +30,14 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
 
-    - name: Build with Gradle (Debug APK)
-      run: ./gradlew assembleDebug
+    - name: Build with Gradle (Optimized Release APK)
+      run: ./gradlew assembleRelease
 
     - name: Upload APK artifact
       uses: actions/upload-artifact@v4
       with:
-        name: alad-app-debug
-        path: app/build/outputs/apk/debug/app-debug.apk
+        name: alad-app-release
+        path: app/build/outputs/apk/release/app-release.apk
 
   release:
     name: Create GitHub Release
@@ -46,12 +49,12 @@ jobs:
     - name: Download APK from build job
       uses: actions/download-artifact@v4
       with:
-        name: alad-app-debug
+        name: alad-app-release
 
     - name: Release APK
       uses: softprops/action-gh-release@v2
       with:
-        files: app-debug.apk
+        files: app-release.apk
         generate_release_notes: true
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

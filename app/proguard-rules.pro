@@ -1,0 +1,11 @@
+-keepattributes *Annotation*,Signature,InnerClasses,EnclosingMethod
+-keep class com.alad.app.** { *; }
+-keep class okhttp3.** { *; }
+-keep class okio.** { *; }
+-keep class org.json.** { *; }
+-dontwarn okhttp3.**
+-dontwarn okio.**
+-dontwarn javax.annotation.**
+-dontwarn org.conscrypt.**
+-dontwarn org.bouncycastle.**
+-dontwarn org.openjsse.**
