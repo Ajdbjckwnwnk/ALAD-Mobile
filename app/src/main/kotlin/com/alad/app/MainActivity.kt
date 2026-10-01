@@ -18,7 +18,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import com.alad.app.core.service.AudioDubbingForegroundService
 import com.alad.app.data.repository.UserPreferencesRepository
 import com.alad.app.presentation.main.MainScreen
@@ -49,7 +52,12 @@ class MainActivity : ComponentActivity() {
     ) { permissions ->
         val audioGranted = permissions[Manifest.permission.RECORD_AUDIO] == true
         if (audioGranted) {
-            launchScreenCapture()
+            val currentMode = mainViewModel.captureMode.value
+            if (currentMode == com.alad.app.data.repository.CaptureMode.SYSTEM) {
+                launchScreenCapture()
+            } else {
+                startDubbingServiceMic()
+            }
         } else {
             Toast.makeText(this, "Audio permission is required", Toast.LENGTH_SHORT).show()
             mainViewModel.updateStatus("Disconnected")
@@ -97,24 +105,33 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun checkPermissionsAndConnect() {
-        val permissionsToRequest = mutableListOf(Manifest.permission.RECORD_AUDIO)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            permissionsToRequest.add(Manifest.permission.POST_NOTIFICATIONS)
-        }
-
-        val missingPermissions = permissionsToRequest.filter {
-            ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
-        }
-
-        if (missingPermissions.isEmpty()) {
-            val currentMode = mainViewModel.captureMode.value
-            if (currentMode == com.alad.app.data.repository.CaptureMode.SYSTEM) {
-                launchScreenCapture()
-            } else {
-                startDubbingServiceMic()
+        lifecycleScope.launch {
+            val repository = UserPreferencesRepository(applicationContext)
+            val key = repository.apiKeyFlow.first()
+            if (key.isBlank()) {
+                Toast.makeText(this@MainActivity, "لطفاً ابتدا در تنظیمات کلید API جمینای را وارد کنید", Toast.LENGTH_LONG).show()
+                return@launch
             }
-        } else {
-            permissionLauncher.launch(missingPermissions.toTypedArray())
+
+            val permissionsToRequest = mutableListOf(Manifest.permission.RECORD_AUDIO)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                permissionsToRequest.add(Manifest.permission.POST_NOTIFICATIONS)
+            }
+
+            val missingPermissions = permissionsToRequest.filter {
+                ContextCompat.checkSelfPermission(this@MainActivity, it) != PackageManager.PERMISSION_GRANTED
+            }
+
+            if (missingPermissions.isEmpty()) {
+                val currentMode = mainViewModel.captureMode.value
+                if (currentMode == com.alad.app.data.repository.CaptureMode.SYSTEM) {
+                    launchScreenCapture()
+                } else {
+                    startDubbingServiceMic()
+                }
+            } else {
+                permissionLauncher.launch(missingPermissions.toTypedArray())
+            }
         }
     }
 

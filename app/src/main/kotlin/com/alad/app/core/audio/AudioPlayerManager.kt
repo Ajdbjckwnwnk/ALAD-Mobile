@@ -68,6 +68,14 @@ class AudioPlayerManager(private val context: Context) {
         audioTrack?.setVolume(volume)
     }
 
+    fun flush() {
+        try {
+            audioTrack?.flush()
+        } catch (e: Exception) {
+            // Ignore
+        }
+    }
+
     fun stop() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             focusRequest?.let { audioManager?.abandonAudioFocusRequest(it) }

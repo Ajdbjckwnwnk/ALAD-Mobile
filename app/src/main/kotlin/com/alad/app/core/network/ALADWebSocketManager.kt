@@ -14,6 +14,7 @@ class ALADWebSocketManager(
     private var webSocket: WebSocket? = null
     var onBinaryMessageReceived: ((ByteArray) -> Unit)? = null
     var onStatusChanged: ((String) -> Unit)? = null
+    var onInterrupted: (() -> Unit)? = null
 
     companion object {
         private const val TAG = "ALADWebSocketManager"
@@ -48,17 +49,22 @@ class ALADWebSocketManager(
                     
                     if (json.has("serverContent") || json.has("server_content")) {
                         val serverContent = json.optJSONObject("serverContent") ?: json.optJSONObject("server_content")
-                        if (serverContent != null && (serverContent.has("modelTurn") || serverContent.has("model_turn"))) {
-                            val modelTurn = serverContent.optJSONObject("modelTurn") ?: serverContent.optJSONObject("model_turn")
-                            val parts = modelTurn?.optJSONArray("parts")
-                            if (parts != null) {
-                                for (i in 0 until parts.length()) {
-                                    val part = parts.getJSONObject(i)
-                                    val inlineData = part.optJSONObject("inlineData") ?: part.optJSONObject("inline_data")
-                                    if (inlineData != null) {
-                                        val base64Data = inlineData.getString("data")
-                                        val audioBytes = Base64.decode(base64Data, Base64.DEFAULT)
-                                        onBinaryMessageReceived?.invoke(audioBytes)
+                        if (serverContent != null) {
+                            if (serverContent.optBoolean("interrupted", false)) {
+                                onInterrupted?.invoke()
+                            }
+                            if (serverContent.has("modelTurn") || serverContent.has("model_turn")) {
+                                val modelTurn = serverContent.optJSONObject("modelTurn") ?: serverContent.optJSONObject("model_turn")
+                                val parts = modelTurn?.optJSONArray("parts")
+                                if (parts != null) {
+                                    for (i in 0 until parts.length()) {
+                                        val part = parts.getJSONObject(i)
+                                        val inlineData = part.optJSONObject("inlineData") ?: part.optJSONObject("inline_data")
+                                        if (inlineData != null) {
+                                            val base64Data = inlineData.getString("data")
+                                            val audioBytes = Base64.decode(base64Data, Base64.DEFAULT)
+                                            onBinaryMessageReceived?.invoke(audioBytes)
+                                        }
                                     }
                                 }
                             }
@@ -99,38 +105,45 @@ class ALADWebSocketManager(
     
     private fun sendGeminiSetup(targetLang: String, filterNativeSpeech: Boolean) {
         val targetLangCode = targetLang.split("-")[0]
+        
+        val promptText = if (filterNativeSpeech) {
+            """
+                You are a professional real-time live interpreter and voice dubber.
+                Target Language: $targetLangCode (Persian/Farsi).
+                
+                OPERATIONAL RULES:
+                1. Listen to the input foreign audio (e.g. English broadcast, video speech, or lectures).
+                2. Immediately translate and speak out the translation fluently in natural spoken $targetLangCode.
+                3. NATIVE SPEECH SUPPRESSION: If the speaker is ALREADY speaking in $targetLangCode, or if people in the background talk in $targetLangCode, YOU MUST REMAIN 100% COMPLETELY SILENT. Do NOT echo, do NOT repeat, and do NOT translate.
+                4. NON-SPEECH SOUNDS: Completely ignore background ambient noise, coughing, room noise, TV theme music, laughter, or breathing.
+                5. Output ONLY speech audio in $targetLangCode. Never add commentary, introductory words, or conversational filler.
+            """.trimIndent()
+        } else {
+            """
+                You are a professional real-time live interpreter and voice dubber.
+                Target Language: $targetLangCode.
+                Translate any foreign speech immediately and fluently into spoken $targetLangCode.
+                Do not add commentary.
+            """.trimIndent()
+        }
+
         val setupPayload = JSONObject().apply {
             put("setup", JSONObject().apply {
-                put("model", "models/gemini-3.5-live-translate-preview")
+                put("model", "models/gemini-2.0-flash-exp")
                 put("generationConfig", JSONObject().apply {
                     put("responseModalities", JSONArray().put("AUDIO"))
-                    put("translationConfig", JSONObject().apply {
-                        put("targetLanguageCode", targetLangCode)
-                        put("echoTargetLanguage", !filterNativeSpeech)
+                    put("speechConfig", JSONObject().apply {
+                        put("voiceConfig", JSONObject().apply {
+                            put("prebuiltVoiceConfig", JSONObject().apply {
+                                put("voiceName", "Aoede")
+                            })
+                        })
                     })
                 })
-                
-                if (filterNativeSpeech) {
-                    val promptText = """
-                        You are a strict, real-time live audio interpreter.
-                        Target Language: $targetLangCode (e.g., Persian / فارسی).
-                        
-                        CRITICAL FILTERING & TRANSLATION DIRECTIVES:
-                        1. Translate spoken foreign speech (such as English news broadcast, video dialogues, or lectures) directly and fluently into natural spoken $targetLangCode.
-                        2. NATIVE SPEECH SUPPRESSION: If the input speech is ALREADY in $targetLangCode, or if someone nearby in the room speaks in $targetLangCode, YOU MUST COMPLETELY IGNORE IT. Do NOT translate it, do NOT repeat it, and do NOT respond. Stay 100% SILENT.
-                        3. NON-SPEECH SOUNDS: Completely ignore ambient noise, background room chatter, music, coughing, laughter, or breathing.
-                        4. Output ONLY the translated audio stream. Never add commentary or meta-talk.
-                    """.trimIndent()
-
-                    put("systemInstruction", JSONObject().apply {
-                        put("parts", JSONArray().put(JSONObject().apply {
-                            put("text", promptText)
-                        }))
-                    })
-                }
-
-                put("sessionResumption", JSONObject().apply {
-                    put("handle", JSONObject.NULL)
+                put("systemInstruction", JSONObject().apply {
+                    put("parts", JSONArray().put(JSONObject().apply {
+                        put("text", promptText)
+                    }))
                 })
             })
         }
@@ -152,10 +165,10 @@ class ALADWebSocketManager(
     private fun sendAudioNow(base64Audio: String) {
         val inputPayload = JSONObject().apply {
             put("realtimeInput", JSONObject().apply {
-                put("audio", JSONObject().apply {
+                put("mediaChunks", JSONArray().put(JSONObject().apply {
                     put("mimeType", "audio/pcm;rate=16000")
                     put("data", base64Audio)
-                })
+                }))
             })
         }
         webSocket?.send(inputPayload.toString())

@@ -67,17 +67,9 @@ class AudioDubbingForegroundService : Service() {
                     val serviceType = if (captureMode == "SYSTEM") {
                         ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION
                     } else {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                            ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE
-                        } else {
-                            0
-                        }
+                        ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE
                     }
-                    if (serviceType != 0) {
-                        startForeground(NOTIFICATION_ID, notification, serviceType)
-                    } else {
-                        startForeground(NOTIFICATION_ID, notification)
-                    }
+                    startForeground(NOTIFICATION_ID, notification, serviceType)
                 } else {
                     startForeground(NOTIFICATION_ID, notification)
                 }
@@ -152,6 +144,10 @@ class AudioDubbingForegroundService : Service() {
             
             webSocketManager?.onBinaryMessageReceived = { audioChunk ->
                 audioPlayerManager?.playAudioData(audioChunk)
+            }
+
+            webSocketManager?.onInterrupted = {
+                audioPlayerManager?.flush()
             }
             
             webSocketManager?.connect(apiKey, "", targetLang, filterNativeSpeech)
