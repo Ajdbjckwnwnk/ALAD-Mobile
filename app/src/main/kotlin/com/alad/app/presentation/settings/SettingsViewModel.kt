@@ -64,6 +64,55 @@ class SettingsViewModel(private val repository: UserPreferencesRepository) : Vie
     fun updateFilterNativeSpeech(filter: Boolean) { _filterNativeSpeech.value = filter }
     fun updateVadEnabled(enabled: Boolean) { _vadEnabled.value = enabled }
 
+    fun applyV2RayPreset() {
+        _proxyHost.value = "127.0.0.1"
+        _proxyPort.value = 10808
+        _proxyType.value = "SOCKS5"
+        _proxyEnabled.value = true
+    }
+
+    fun importConfigString(rawConfig: String): Boolean {
+        val trimmed = rawConfig.trim()
+        if (trimmed.isEmpty()) return false
+
+        return try {
+            if (trimmed.startsWith("wss://", ignoreCase = true) || trimmed.startsWith("https://", ignoreCase = true)) {
+                _customWsUrl.value = trimmed
+                true
+            } else if (trimmed.startsWith("socks5://", ignoreCase = true) || trimmed.startsWith("socks://", ignoreCase = true)) {
+                val uri = java.net.URI(trimmed)
+                _proxyHost.value = uri.host ?: "127.0.0.1"
+                _proxyPort.value = if (uri.port > 0) uri.port else 10808
+                _proxyType.value = "SOCKS5"
+                _proxyEnabled.value = true
+                true
+            } else if (trimmed.startsWith("http://", ignoreCase = true)) {
+                val uri = java.net.URI(trimmed)
+                _proxyHost.value = uri.host ?: "127.0.0.1"
+                _proxyPort.value = if (uri.port > 0) uri.port else 8080
+                _proxyType.value = "HTTP"
+                _proxyEnabled.value = true
+                true
+            } else if (trimmed.contains(":") && !trimmed.contains("/")) {
+                val parts = trimmed.split(":")
+                val host = parts[0].trim()
+                val port = parts[1].trim().toIntOrNull()
+                if (port != null && port in 1..65535) {
+                    _proxyHost.value = host
+                    _proxyPort.value = port
+                    _proxyType.value = "SOCKS5"
+                    _proxyEnabled.value = true
+                    true
+                } else false
+            } else {
+                _customWsUrl.value = trimmed
+                true
+            }
+        } catch (e: Exception) {
+            false
+        }
+    }
+
     fun saveSettings() {
         viewModelScope.launch {
             repository.updateApiKey(_apiKey.value)

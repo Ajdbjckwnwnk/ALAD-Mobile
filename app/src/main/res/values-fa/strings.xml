@@ -43,6 +43,11 @@
     <string name="proxy_type">نوع پروتکل پروکسی</string>
     <string name="custom_ws_url">آدرس اختصاصی WebSocket / ریورس پروکسی (اختیاری)</string>
     <string name="custom_ws_url_desc">اتصال از طریق ورکر Cloudflare یا سرور شخصی جهت کارکرد بدون فیلترشکن</string>
+    <string name="quick_config_import">وارد کردن سریع کانفیگ / اتصال آماده</string>
+    <string name="import_config_desc">لینک پروکسی یا ورکر (socks5:// یا http:// یا wss://) را وارد کنید تا خودکار تنظیم شود</string>
+    <string name="v2ray_preset_btn">⚡ تنظیم خودکار پروکسی v2rayNG / Nekobox (127.0.0.1:10808)</string>
+    <string name="config_imported_success">کانفیگ با موفقیت شناسایی و اعمال شد!</string>
+    <string name="config_import_failed">فرمت کانفیگ نامعتبر است</string>
 
     <!-- فیلتر هوشمند و نویز -->
     <string name="ai_audio_filter_settings">بهینه‌سازی صدا و هوش مصنوعی</string>

@@ -283,6 +283,77 @@ fun SettingsScreen(viewModel: SettingsViewModel, onBack: () -> Unit = {}) {
 
                         Spacer(modifier = Modifier.height(16.dp))
 
+                        // Quick v2rayNG / Nekobox 1-Tap Preset Button
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(NeonBlue.copy(alpha = 0.12f))
+                                .border(BorderStroke(1.dp, NeonBlue.copy(alpha = 0.35f)), RoundedCornerShape(12.dp))
+                                .clickable {
+                                    viewModel.applyV2RayPreset()
+                                    scope.launch {
+                                        snackbarHostState.showSnackbar(context.getString(R.string.config_imported_success))
+                                    }
+                                }
+                                .padding(horizontal = 14.dp, vertical = 10.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = stringResource(R.string.v2ray_preset_btn),
+                                color = NeonBlue,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 12.sp
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        // Quick Config Input Field
+                        var rawConfigInput by remember { mutableStateOf("") }
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            OutlinedTextField(
+                                value = rawConfigInput,
+                                onValueChange = { rawConfigInput = it },
+                                placeholder = { Text("socks5://... یا wss://...", color = TextSecondary.copy(alpha = 0.5f), fontSize = 12.sp) },
+                                label = { Text(stringResource(R.string.quick_config_import), fontSize = 11.sp) },
+                                modifier = Modifier.weight(1f),
+                                shape = RoundedCornerShape(12.dp),
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedContainerColor = Color(0x25FFFFFF),
+                                    unfocusedContainerColor = Color(0x12FFFFFF),
+                                    focusedBorderColor = NeonBlue,
+                                    unfocusedBorderColor = Color.White.copy(alpha = 0.15f),
+                                    focusedTextColor = Color.White,
+                                    unfocusedTextColor = Color.White
+                                )
+                            )
+
+                            Button(
+                                onClick = {
+                                    val success = viewModel.importConfigString(rawConfigInput)
+                                    val msg = if (success) {
+                                        rawConfigInput = ""
+                                        context.getString(R.string.config_imported_success)
+                                    } else {
+                                        context.getString(R.string.config_import_failed)
+                                    }
+                                    scope.launch { snackbarHostState.showSnackbar(msg) }
+                                },
+                                shape = RoundedCornerShape(12.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = NeonBlue),
+                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
+                            ) {
+                                Text("ثبت", color = DeepSpace, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
                         // In-app Proxy Toggle
                         Row(
                             modifier = Modifier.fillMaxWidth(),

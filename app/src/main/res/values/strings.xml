@@ -43,6 +43,11 @@
     <string name="proxy_type">Proxy Type</string>
     <string name="custom_ws_url">Custom Base WebSocket URL (Optional)</string>
     <string name="custom_ws_url_desc">Use a Cloudflare Worker or custom reverse proxy to connect without VPN</string>
+    <string name="quick_config_import">Quick Config Import / Presets</string>
+    <string name="import_config_desc">Paste any proxy link (socks5://, http://, or wss://) to auto-configure</string>
+    <string name="v2ray_preset_btn">⚡ Auto-set v2rayNG / Nekobox (127.0.0.1:10808)</string>
+    <string name="config_imported_success">Config imported successfully!</string>
+    <string name="config_import_failed">Invalid config format</string>
 
     <!-- AI & Noise Filtering -->
     <string name="ai_audio_filter_settings">AI &amp; Sound Optimization</string>
