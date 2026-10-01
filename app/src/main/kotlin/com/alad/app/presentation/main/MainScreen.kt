@@ -37,6 +37,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -280,7 +281,7 @@ fun MainScreen(
                                     .clip(RoundedCornerShape(14.dp))
                                     .background(
                                         if (isMic) Brush.horizontalGradient(listOf(NeonCyan.copy(alpha = 0.25f), NeonBlue.copy(alpha = 0.25f)))
-                                        else Color(0x12FFFFFF)
+                                        else SolidColor(Color(0x12FFFFFF))
                                     )
                                     .border(
                                         BorderStroke(
@@ -318,7 +319,7 @@ fun MainScreen(
                                     .clip(RoundedCornerShape(14.dp))
                                     .background(
                                         if (isSystem) Brush.horizontalGradient(listOf(NeonPurple.copy(alpha = 0.25f), NeonViolet.copy(alpha = 0.25f)))
-                                        else Color(0x12FFFFFF)
+                                        else SolidColor(Color(0x12FFFFFF))
                                     )
                                     .border(
                                         BorderStroke(

@@ -35,6 +35,8 @@ import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.lifecycle.setViewTreeViewModelStoreOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.alad.app.ui.theme.*
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.first
 
 class OverlayWidgetService : LifecycleService() {
 
